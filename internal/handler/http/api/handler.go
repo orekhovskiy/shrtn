@@ -1,13 +1,14 @@
 package api
 
-import (
-	service "github.com/orekhovskiy/shrtn/internal/service/urlservice"
-)
-
-type Handler struct {
-	urlService service.Service
+type Service interface {
+	GetById(id string) (url string, err error)
+	Save(url string) (id string)
 }
 
-func NewHandler(urlService service.Service) *Handler {
+type Handler struct {
+	urlService Service
+}
+
+func NewHandler(urlService Service) *Handler {
 	return &Handler{urlService: urlService}
 }
