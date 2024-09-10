@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/orekhovskiy/shrtn/config"
 	"net/http"
 )
 
@@ -16,10 +17,10 @@ type Server struct {
 	srv *http.Server
 }
 
-func NewServer() *Server {
+func NewServer(opts *config.Config) *Server {
 	server := &Server{
 		&http.Server{
-			Addr: fmt.Sprintf("%s:%s", host, port),
+			Addr: opts.ServerAddress,
 		},
 	}
 

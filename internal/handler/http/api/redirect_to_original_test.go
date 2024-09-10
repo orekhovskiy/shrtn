@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"github.com/orekhovskiy/shrtn/config"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -13,7 +14,8 @@ import (
 // Mocking the URL service
 func TestRedirectToOriginal(t *testing.T) {
 	mockService := new(MockURLService)
-	handler := Handler{urlService: mockService}
+	opts := config.Config{BaseURL: "http://localhost:8080"}
+	handler := Handler{opts: opts, urlService: mockService}
 
 	tests := []struct {
 		name             string

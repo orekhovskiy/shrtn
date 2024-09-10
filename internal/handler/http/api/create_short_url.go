@@ -35,7 +35,7 @@ func (h Handler) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id := h.urlService.Save(originalURL)
-	shortURL := fmt.Sprintf("http://localhost:8080/%s", id)
+	shortURL := fmt.Sprintf("%s/%s", h.opts.BaseURL, id)
 
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "text/plain")
