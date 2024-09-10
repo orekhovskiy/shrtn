@@ -1,16 +1,16 @@
 package http
 
 import (
+	"github.com/go-chi/chi/v5"
 	"github.com/orekhovskiy/shrtn/internal/handler/http/api"
-	"net/http"
 )
 
 type Router struct {
-	router *http.ServeMux
+	router *chi.Mux
 }
 
 func NewRouter() *Router {
-	return &Router{router: http.NewServeMux()}
+	return &Router{router: chi.NewMux()}
 }
 
 func (r *Router) WithHandler(h api.Handler) *Router {
