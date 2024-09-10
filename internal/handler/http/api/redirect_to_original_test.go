@@ -12,7 +12,7 @@ import (
 
 // Mocking the URL service
 func TestRedirectToOriginal(t *testing.T) {
-	mockService := new(MockUrlService)
+	mockService := new(MockURLService)
 	handler := Handler{urlService: mockService}
 
 	tests := []struct {
@@ -43,7 +43,7 @@ func TestRedirectToOriginal(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockService.On("GetById", strings.TrimPrefix(tt.path, "/")).Return(tt.mockReturnURL, tt.mockReturnError)
+			mockService.On("GetByID", strings.TrimPrefix(tt.path, "/")).Return(tt.mockReturnURL, tt.mockReturnError)
 
 			req := httptest.NewRequest(http.MethodGet, tt.path, nil)
 			rec := httptest.NewRecorder()

@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func (h Handler) CreateShortUrl(w http.ResponseWriter, r *http.Request) {
+func (h Handler) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return

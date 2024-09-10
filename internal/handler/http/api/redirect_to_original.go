@@ -8,7 +8,7 @@ import (
 
 func (h Handler) RedirectToOriginal(w http.ResponseWriter, r *http.Request) {
 	id := strings.TrimPrefix(r.URL.Path, "/")
-	originalURL, err := h.urlService.GetById(id)
+	originalURL, err := h.urlService.GetByID(id)
 
 	if err != nil {
 		fmt.Println(err)

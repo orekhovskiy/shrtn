@@ -1,7 +1,7 @@
 package api
 
 type Service interface {
-	GetById(id string) (url string, err error)
+	GetByID(id string) (url string, err error)
 	Save(url string) (id string)
 }
 

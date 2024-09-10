@@ -11,7 +11,7 @@ import (
 )
 
 func TestCreateShortUrl(t *testing.T) {
-	mockService := new(MockUrlService)
+	mockService := new(MockURLService)
 	handler := Handler{urlService: mockService}
 
 	tests := []struct {
