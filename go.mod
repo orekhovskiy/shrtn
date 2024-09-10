@@ -1,6 +1,6 @@
 module github.com/orekhovskiy/shrtn
 
-go 1.23.1
+go 1.22.5
 
 require github.com/stretchr/testify v1.9.0
 
