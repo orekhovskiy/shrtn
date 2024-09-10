@@ -69,7 +69,7 @@ func TestCreateShortUrl(t *testing.T) {
 
 			rec := httptest.NewRecorder()
 
-			handler.CreateShortUrl(rec, req)
+			handler.CreateShortURL(rec, req)
 
 			assert.Equal(t, tt.expectedStatus, rec.Code)
 
