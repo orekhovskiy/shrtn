@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	ContentTypePlainText = "text/plain; charset=utf-8"
+	ContentTypePlainText = "text/plain"
 )
 
 func (h Handler) CreateShortURL(w http.ResponseWriter, r *http.Request) {
