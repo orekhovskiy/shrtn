@@ -3,7 +3,7 @@ package http
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/orekhovskiy/shrtn/internal/handler/http/api"
-	"go.uber.org/zap"
+	"github.com/orekhovskiy/shrtn/internal/logger"
 )
 
 type Router struct {
@@ -14,7 +14,7 @@ func NewRouter() *Router {
 	return &Router{router: chi.NewMux()}
 }
 
-func (r *Router) WithHandler(logger *zap.Logger, h api.Handler) *Router {
+func (r *Router) WithHandler(logger logger.Logger, h api.Handler) *Router {
 	h.AddRoutes(logger, r.router)
 	return r
 }

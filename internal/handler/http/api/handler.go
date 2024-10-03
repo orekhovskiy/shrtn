@@ -16,6 +16,6 @@ type Handler struct {
 	logger     logger.Logger
 }
 
-func NewHandler(logger *logger.Logger, opts *config.Config, urlService Service) *Handler {
-	return &Handler{logger: *logger, opts: *opts, urlService: urlService}
+func NewHandler(logger logger.Logger, opts *config.Config, urlService Service) *Handler {
+	return &Handler{logger: logger, opts: *opts, urlService: urlService}
 }
