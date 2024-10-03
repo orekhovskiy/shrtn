@@ -3,10 +3,15 @@ package api
 import (
 	"net/http"
 
+	"github.com/orekhovskiy/shrtn/internal/handler/http/middleware"
+	"go.uber.org/zap"
+
 	"github.com/go-chi/chi/v5"
 )
 
-func (h *Handler) AddRoutes(r *chi.Mux) {
+func (h *Handler) AddRoutes(logger *zap.Logger, r *chi.Mux) {
+	r.Use(middleware.LoggingMiddleware(logger))
+
 	r.Post("/", h.CreateShortURL)
 	r.Get("/*", h.RedirectToOriginal)
 	r.MethodNotAllowed(methodNotAllowed)
