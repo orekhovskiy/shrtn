@@ -3,25 +3,18 @@ package app
 import (
 	"fmt"
 
-	"github.com/orekhovskiy/shrtn/internal/logger"
-
 	"go.uber.org/zap"
 
 	"github.com/orekhovskiy/shrtn/config"
 	"github.com/orekhovskiy/shrtn/internal/adapter/maprepo/urlrepo"
 	"github.com/orekhovskiy/shrtn/internal/handler/http"
 	"github.com/orekhovskiy/shrtn/internal/handler/http/api"
+	"github.com/orekhovskiy/shrtn/internal/handler/http/api/shorten"
+	"github.com/orekhovskiy/shrtn/internal/logger"
 	"github.com/orekhovskiy/shrtn/internal/service/urlservice"
 )
 
 func Run(opts *config.Config) {
-	//logger, _ := zap.NewProduction()
-	//defer func(logger *zap.Logger) {
-	//	if err := logger.Sync(); err != nil {
-	//		panic(fmt.Sprintf("unable to sync zap logger:%v", err))
-	//	}
-	//}(logger)
-
 	zapLogger, err := logger.NewZapLogger() // Assuming logger is the package where ZapLogger is defined
 	if err != nil {
 		panic(fmt.Sprintf("unable to create zap logger: %v", err))
@@ -34,10 +27,13 @@ func Run(opts *config.Config) {
 
 	repo := urlrepo.NewRepository()
 	service := urlservice.NewService(repo)
-	handler := api.NewHandler(zapLogger, opts, *service)
+	apiHandler := api.NewHandler(zapLogger, opts, *service)
+	shortenHandler := shorten.NewHandler(zapLogger, opts, *service)
 
 	router := http.NewRouter()
-	router.WithHandler(zapLogger, *handler)
+	router.
+		WithHandler(apiHandler).
+		WithHandler(shortenHandler)
 
 	server := http.NewServer(opts)
 	server.RegisterRoutes(router)
