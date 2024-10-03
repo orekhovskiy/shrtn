@@ -1,4 +1,4 @@
-package api
+package shorten
 
 import (
 	"github.com/orekhovskiy/shrtn/config"
