@@ -4,13 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/orekhovskiy/shrtn/config"
 	"net/http"
-)
 
-const (
-	host = "localhost"
-	port = "8080"
+	"github.com/orekhovskiy/shrtn/config"
 )
 
 type Server struct {

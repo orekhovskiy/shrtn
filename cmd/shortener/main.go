@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
 
 	"github.com/orekhovskiy/shrtn/config"
@@ -11,14 +11,14 @@ import (
 func main() {
 	conf, err := config.InitializeConfig()
 	if err != nil {
-		fmt.Printf("Error initializing config: %v\n", err)
+		log.Printf("error initializing config: %v", err)
 		os.Exit(1)
 	}
 
 	app.Run(conf)
 
 	if err != nil {
-		fmt.Printf("Error starting server: %v\n", err)
+		log.Printf("error starting server: %v", err)
 		os.Exit(1)
 	}
 }

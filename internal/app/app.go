@@ -1,7 +1,8 @@
 package app
 
 import (
-	"fmt"
+	"log"
+
 	"github.com/orekhovskiy/shrtn/config"
 	"github.com/orekhovskiy/shrtn/internal/adapter/maprepo/urlrepo"
 	"github.com/orekhovskiy/shrtn/internal/handler/http"
@@ -20,10 +21,10 @@ func Run(opts *config.Config) {
 	server := http.NewServer(opts)
 	server.RegisterRoutes(router)
 
-	fmt.Printf("Starting server on %s\n", opts.ServerAddress)
+	log.Printf("starting server on %s", opts.ServerAddress)
 	err := server.Start()
 	if err != nil {
-		fmt.Printf("unable to start a server: %s", err)
+		log.Printf("unable to start a server: %s", err)
 		return
 	}
 }

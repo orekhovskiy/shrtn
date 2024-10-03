@@ -2,13 +2,15 @@ package api
 
 import (
 	"fmt"
-	"github.com/orekhovskiy/shrtn/config"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/orekhovskiy/shrtn/config"
+
 	"strings"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // Mocking the URL service

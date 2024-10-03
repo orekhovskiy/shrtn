@@ -3,9 +3,14 @@ package api
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
+)
+
+const (
+	ContentTypePlainText = "text/plain; charset=utf-8"
 )
 
 func (h Handler) CreateShortURL(w http.ResponseWriter, r *http.Request) {
@@ -14,7 +19,7 @@ func (h Handler) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !strings.HasPrefix(r.Header.Get("Content-Type"), "text/plain") {
+	if !strings.HasPrefix(r.Header.Get("Content-Type"), ContentTypePlainText) {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
@@ -28,8 +33,7 @@ func (h Handler) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 
 	_, err = url.ParseRequestURI(originalURL)
 	if err != nil {
-		errorMessage := fmt.Sprintf("unable to shorten non-url like string %s: %s", originalURL, err)
-		fmt.Println(errorMessage)
+		log.Printf("unable to shorten non-url like string %s: %v", originalURL, err)
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}

@@ -1,7 +1,7 @@
 package api
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -11,12 +11,11 @@ func (h Handler) RedirectToOriginal(w http.ResponseWriter, r *http.Request) {
 	originalURL, err := h.urlService.GetByID(id)
 
 	if err != nil {
-		fmt.Println(err)
+		log.Printf("error getting original url by id %s: %v", id, err)
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
 
-	logMessage := fmt.Sprintf("Redirecting to %s", originalURL)
-	fmt.Println(logMessage)
+	log.Printf("Redirecting to %s", originalURL)
 	http.Redirect(w, r, originalURL, http.StatusTemporaryRedirect)
 }
