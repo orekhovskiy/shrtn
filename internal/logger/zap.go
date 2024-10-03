@@ -7,11 +7,11 @@ type ZapLogger struct {
 }
 
 func (z *ZapLogger) Info(msg string, fields ...zap.Field) {
-	z.Logger.Info(msg, fields...)
+	z.Logger.WithOptions(zap.AddCallerSkip(1)).Info(msg, fields...)
 }
 
 func (z *ZapLogger) Error(msg string, fields ...zap.Field) {
-	z.Logger.Error(msg, fields...)
+	z.Logger.WithOptions(zap.AddCallerSkip(1)).Error(msg, fields...)
 }
 
 func NewZapLogger() (*ZapLogger, error) {
