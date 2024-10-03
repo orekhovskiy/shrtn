@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/orekhovskiy/shrtn/config"
-	"go.uber.org/zap"
+	"github.com/orekhovskiy/shrtn/internal/logger"
 )
 
 type Service interface {
@@ -13,9 +13,9 @@ type Service interface {
 type Handler struct {
 	opts       config.Config
 	urlService Service
-	logger     zap.Logger
+	logger     logger.Logger
 }
 
-func NewHandler(logger *zap.Logger, opts *config.Config, urlService Service) *Handler {
+func NewHandler(logger *logger.Logger, opts *config.Config, urlService Service) *Handler {
 	return &Handler{logger: *logger, opts: *opts, urlService: urlService}
 }
