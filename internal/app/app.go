@@ -1,7 +1,11 @@
 package app
 
 import (
-	"log"
+	"fmt"
+
+	"github.com/orekhovskiy/shrtn/internal/logger"
+
+	"go.uber.org/zap"
 
 	"github.com/orekhovskiy/shrtn/config"
 	"github.com/orekhovskiy/shrtn/internal/adapter/maprepo/urlrepo"
@@ -11,20 +15,38 @@ import (
 )
 
 func Run(opts *config.Config) {
+	//logger, _ := zap.NewProduction()
+	//defer func(logger *zap.Logger) {
+	//	if err := logger.Sync(); err != nil {
+	//		panic(fmt.Sprintf("unable to sync zap logger:%v", err))
+	//	}
+	//}(logger)
+
+	zapLogger, err := logger.NewZapLogger() // Assuming logger is the package where ZapLogger is defined
+	if err != nil {
+		panic(fmt.Sprintf("unable to create zap logger: %v", err))
+	}
+	defer func() {
+		if err := zapLogger.Sync(); err != nil {
+			panic(fmt.Sprintf("unable to sync zap logger: %v", err))
+		}
+	}()
+
 	repo := urlrepo.NewRepository()
 	service := urlservice.NewService(repo)
-	handler := api.NewHandler(opts, *service)
+	handler := api.NewHandler(zapLogger, opts, *service)
 
 	router := http.NewRouter()
-	router.WithHandler(*handler)
+	router.WithHandler(zapLogger, *handler)
 
 	server := http.NewServer(opts)
 	server.RegisterRoutes(router)
 
-	log.Printf("starting server on %s", opts.ServerAddress)
-	err := server.Start()
-	if err != nil {
-		log.Printf("unable to start a server: %s", err)
-		return
+	zapLogger.Info("starting server",
+		zap.String("address", opts.ServerAddress),
+	)
+
+	if err := server.Start(); err != nil {
+		panic(fmt.Sprintf("unable to start a server: %v", err))
 	}
 }

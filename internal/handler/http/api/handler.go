@@ -1,6 +1,9 @@
 package api
 
-import "github.com/orekhovskiy/shrtn/config"
+import (
+	"github.com/orekhovskiy/shrtn/config"
+	"github.com/orekhovskiy/shrtn/internal/logger"
+)
 
 type Service interface {
 	GetByID(id string) (url string, err error)
@@ -10,8 +13,9 @@ type Service interface {
 type Handler struct {
 	opts       config.Config
 	urlService Service
+	logger     logger.Logger
 }
 
-func NewHandler(opts *config.Config, urlService Service) *Handler {
-	return &Handler{opts: *opts, urlService: urlService}
+func NewHandler(logger logger.Logger, opts *config.Config, urlService Service) *Handler {
+	return &Handler{logger: logger, opts: *opts, urlService: urlService}
 }

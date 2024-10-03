@@ -3,10 +3,11 @@ package api
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"go.uber.org/zap"
 )
 
 const (
@@ -33,7 +34,10 @@ func (h Handler) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 
 	_, err = url.ParseRequestURI(originalURL)
 	if err != nil {
-		log.Printf("unable to shorten non-url like string %s: %v", originalURL, err)
+		h.logger.Error("unable to shorten non-url like string",
+			zap.String("url", originalURL),
+			zap.Error(err),
+		)
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
@@ -42,6 +46,10 @@ func (h Handler) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 	shortURL := fmt.Sprintf("%s/%s", h.opts.BaseURL, id)
 
 	w.WriteHeader(http.StatusCreated)
-	w.Header().Set("Content-Type", "text/plain")
-	w.Write([]byte(shortURL))
+	w.Header().Set("Content-Type", ContentTypePlainText)
+	_, err = w.Write([]byte(shortURL))
+	if err != nil {
+		http.Error(w, "Internal Error", http.StatusInternalServerError)
+		return
+	}
 }
