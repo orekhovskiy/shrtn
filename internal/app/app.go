@@ -29,7 +29,7 @@ func Run(opts *config.Config) {
 	if err != nil {
 		panic(fmt.Sprintf("unable to load records from storage: %v", err))
 	}
-	service := urlservice.NewService(*repo)
+	service := urlservice.NewService(repo)
 	apiHandler := api.NewHandler(zapLogger, opts, *service)
 	shortenHandler := shorten.NewHandler(zapLogger, opts, *service)
 

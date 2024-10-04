@@ -4,18 +4,15 @@ import (
 	"bufio"
 	"encoding/json"
 	"os"
-	"slices"
 
 	"github.com/google/uuid"
 )
 
 func (r *Repository) Save(id string, url string) error {
-	index := slices.IndexFunc(r.records, func(record URLRecord) bool {
-		return record.ShortURL == id
-	})
-
-	if index != -1 {
-		return nil
+	for _, record := range r.records {
+		if record.ShortURL == id {
+			return nil
+		}
 	}
 
 	record := URLRecord{
@@ -43,12 +40,13 @@ func (r *Repository) Save(id string, url string) error {
 		return err
 	}
 
-	_, err = writer.WriteString(string(data) + "\n")
-	if err != nil {
+	if _, err := writer.WriteString(string(data) + "\n"); err != nil {
 		return err
 	}
 
-	writer.Flush()
+	if err := writer.Flush(); err != nil {
+		return err
+	}
 
 	return nil
 }

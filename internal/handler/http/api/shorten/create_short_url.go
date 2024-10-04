@@ -58,7 +58,14 @@ func (h Handler) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id := h.urlService.Save(originalURL)
+	id, err := h.urlService.Save(originalURL)
+	if err != nil {
+		h.logger.Error("error while saving url",
+			zap.String("url", originalURL),
+			zap.Error(err),
+		)
+		http.Error(w, "Internal Error", http.StatusInternalServerError)
+	}
 	shortURL := fmt.Sprintf("%s/%s", h.opts.BaseURL, id)
 
 	response := ShortenResponse{Result: shortURL}

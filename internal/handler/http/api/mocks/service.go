@@ -7,9 +7,9 @@ type MockURLService struct {
 	mock.Mock
 }
 
-func (m *MockURLService) Save(originalURL string) string {
+func (m *MockURLService) Save(originalURL string) (string, error) {
 	args := m.Called(originalURL)
-	return args.String(0)
+	return args.String(0), nil
 }
 
 func (m *MockURLService) GetByID(id string) (string, error) {
