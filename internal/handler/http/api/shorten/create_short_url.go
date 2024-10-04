@@ -13,6 +13,7 @@ import (
 
 const (
 	ContentTypeJSON = "application/json"
+	ContentTypeGzip = "application/x-gzip"
 )
 
 type ShortenRequest struct {
@@ -35,7 +36,8 @@ func (h Handler) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if r.Header.Get("Content-Type") != ContentTypeJSON {
+	if r.Header.Get("Content-Type") != ContentTypeJSON &&
+		r.Header.Get("Content-Type") != ContentTypeGzip {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}

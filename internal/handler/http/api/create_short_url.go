@@ -12,6 +12,7 @@ import (
 
 const (
 	ContentTypePlainText = "text/plain"
+	ContentTypeGzip      = "application/x-gzip"
 )
 
 func (h Handler) CreateShortURL(w http.ResponseWriter, r *http.Request) {
@@ -20,7 +21,8 @@ func (h Handler) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !strings.HasPrefix(r.Header.Get("Content-Type"), ContentTypePlainText) {
+	if !strings.HasPrefix(r.Header.Get("Content-Type"), ContentTypePlainText) &&
+		r.Header.Get("Content-Type") != ContentTypeGzip {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
