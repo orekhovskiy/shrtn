@@ -8,6 +8,7 @@ import (
 type Config struct {
 	ServerAddress string
 	BaseURL       string
+	FilePath      string
 }
 
 func InitializeConfig() (*Config, error) {
@@ -22,6 +23,10 @@ func InitializeConfig() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+	err = viper.BindEnv("FILE_STORAGE_PATH", "FILE_STORAGE_PATH")
+	if err != nil {
+		return nil, err
+	}
 	var rootCmd = &cobra.Command{
 		Use:   "shrtn",
 		Short: "URL Shortener Service",
@@ -33,12 +38,15 @@ func InitializeConfig() (*Config, error) {
 			if viper.GetString("BASE_URL") != "" {
 				config.BaseURL = viper.GetString("BASE_URL")
 			}
+			if viper.GetString("FILE_STORAGE_PATH") != "" {
+				config.FilePath = viper.GetString("FILE_STORAGE_PATH")
+			}
 		},
 	}
 
 	rootCmd.Flags().StringVarP(&config.ServerAddress, "address", "a", "localhost:8080", "HTTP server address (e.g. localhost:8080)")
 	rootCmd.Flags().StringVarP(&config.BaseURL, "base-url", "b", "http://localhost:8080", "Base URL for shortened URLs (e.g. http://localhost:8080/)")
-
+	rootCmd.Flags().StringVarP(&config.FilePath, "file", "f", "storage.json", "Path to the file for storing URLs (e.g. storage.json)")
 	err = rootCmd.Execute()
 	if err != nil {
 		return nil, err
