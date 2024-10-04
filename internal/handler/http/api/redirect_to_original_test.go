@@ -4,20 +4,21 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/orekhovskiy/shrtn/config"
-
-	"strings"
-
+	"github.com/orekhovskiy/shrtn/internal/handler/http/api/mocks"
+	"github.com/orekhovskiy/shrtn/internal/logger"
 	"github.com/stretchr/testify/assert"
 )
 
 // Mocking the URL service
 func TestRedirectToOriginal(t *testing.T) {
-	mockService := new(MockURLService)
+	mockLogger := &logger.NoopLogger{}
+	mockService := new(mocks.MockURLService)
 	opts := config.Config{BaseURL: "http://localhost:8080"}
-	handler := Handler{opts: opts, urlService: mockService}
+	handler := Handler{logger: mockLogger, opts: opts, urlService: mockService}
 
 	tests := []struct {
 		name             string
