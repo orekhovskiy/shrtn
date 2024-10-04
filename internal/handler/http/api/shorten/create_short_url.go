@@ -12,8 +12,7 @@ import (
 )
 
 const (
-	ContentTypePlainText = "text/plain"
-	ContentTypeJSON      = "application/json"
+	ContentTypeJSON = "application/json"
 )
 
 type ShortenRequest struct {
