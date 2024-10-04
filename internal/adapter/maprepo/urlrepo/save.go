@@ -26,7 +26,7 @@ func (r *Repository) Save(id string, url string) error {
 
 	r.records = append(r.records, record)
 
-	if "" == r.filePath {
+	if r.filePath == "" {
 		return nil
 	}
 
