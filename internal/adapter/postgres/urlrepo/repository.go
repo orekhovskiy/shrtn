@@ -15,5 +15,10 @@ func NewRepository(config config.Config) (*Repository, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if _, err := db.Exec(createTableIfNotExists); err != nil {
+		return nil, err
+	}
+
 	return &Repository{db: db}, nil
 }
