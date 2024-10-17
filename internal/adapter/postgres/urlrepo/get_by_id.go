@@ -8,7 +8,7 @@ import (
 
 func (r *Repository) GetByID(id string) (string, error) {
 	var originalURL string
-	err := r.db.QueryRow(getRecordById, id).Scan(&originalURL)
+	err := r.db.QueryRow(getRecordByID, id).Scan(&originalURL)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return "", fmt.Errorf("id not found: %s", id)
