@@ -19,7 +19,7 @@ func (r *Repository) LoadAll() error {
 	}
 	defer file.Close()
 
-	var records []URLRecord
+	records := make(map[string]URLRecord)
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		var record URLRecord
@@ -27,7 +27,7 @@ func (r *Repository) LoadAll() error {
 		if err != nil {
 			return err
 		}
-		records = append(records, record)
+		records[record.ShortURL] = record
 	}
 	r.records = records
 	return scanner.Err()

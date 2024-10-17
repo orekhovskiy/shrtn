@@ -13,14 +13,14 @@ type URLRecord struct {
 }
 
 type Repository struct {
-	records  []URLRecord
+	records  map[string]URLRecord
 	filePath string
 	mu       sync.RWMutex
 }
 
 func NewRepository(opts config.Config) *Repository {
 	return &Repository{
-		records:  []URLRecord{},
+		records:  make(map[string]URLRecord),
 		filePath: opts.FilePath,
 	}
 }

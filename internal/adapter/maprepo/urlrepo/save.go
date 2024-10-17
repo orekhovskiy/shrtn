@@ -12,10 +12,8 @@ func (r *Repository) Save(id string, url string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	for _, record := range r.records {
-		if record.ShortURL == id {
-			return nil
-		}
+	if _, exists := r.records[id]; exists {
+		return nil
 	}
 
 	record := URLRecord{
@@ -24,7 +22,7 @@ func (r *Repository) Save(id string, url string) error {
 		OriginalURL: url,
 	}
 
-	r.records = append(r.records, record)
+	r.records[id] = record
 
 	if r.filePath == "" {
 		return nil
