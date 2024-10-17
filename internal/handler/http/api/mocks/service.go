@@ -16,3 +16,7 @@ func (m *MockURLService) GetByID(id string) (string, error) {
 	args := m.Called(id)
 	return args.String(0), args.Error(1)
 }
+
+func (m *MockURLService) Ping() error {
+	return nil
+}
