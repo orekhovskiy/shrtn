@@ -3,6 +3,7 @@ package urlservice
 type Repository interface {
 	Save(id string, url string) error
 	GetByID(id string) (string, error)
+	Ping() error
 }
 
 type Service struct {

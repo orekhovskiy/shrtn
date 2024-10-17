@@ -12,6 +12,7 @@ func (h *Handler) AddRoutes(r *chi.Mux) {
 	r.Use(middleware.LoggingMiddleware(h.logger))
 	r.Use(middleware.GzipMiddleware)
 
+	r.Get("/ping", h.Ping)
 	r.
 		With(middleware.ContentTypeMiddleware([]string{
 			ContentTypePlainText,

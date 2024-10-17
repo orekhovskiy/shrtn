@@ -8,6 +8,7 @@ import (
 type Service interface {
 	GetByID(id string) (url string, err error)
 	Save(url string) (id string, err error)
+	Ping() error
 }
 
 type Handler struct {
