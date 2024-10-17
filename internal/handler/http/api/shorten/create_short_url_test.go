@@ -46,18 +46,6 @@ func TestCreateShortUrl(t *testing.T) {
 			expectedStatus: http.StatusBadRequest,
 			contentType:    "application/json",
 		},
-		{
-			name:           "Missing Content-Type",
-			requestBody:    `{"url":"https://example.com"}`,
-			expectedStatus: http.StatusBadRequest,
-			contentType:    "",
-		},
-		{
-			name:           "Wrong Content-Type",
-			requestBody:    `{"url":"https://example.com"}`,
-			expectedStatus: http.StatusBadRequest,
-			contentType:    "text/plain",
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

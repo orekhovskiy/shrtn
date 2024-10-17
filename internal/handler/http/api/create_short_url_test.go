@@ -41,22 +41,6 @@ func TestCreateShortUrl(t *testing.T) {
 			expectedBody:   "http://localhost:8080/12345",
 		},
 		{
-			name:           "Non-POST Request",
-			method:         http.MethodGet,
-			contentType:    "text/plain",
-			body:           "http://example.com",
-			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "Bad Request\n",
-		},
-		{
-			name:           "Invalid Content-Type",
-			method:         http.MethodPost,
-			contentType:    "application/json",
-			body:           "http://example.com",
-			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "Bad Request\n",
-		},
-		{
 			name:           "Invalid URL in Body",
 			method:         http.MethodPost,
 			contentType:    "text/plain",

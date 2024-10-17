@@ -12,7 +12,12 @@ func (h *Handler) AddRoutes(r *chi.Mux) {
 	r.Use(middleware.LoggingMiddleware(h.logger))
 	r.Use(middleware.GzipMiddleware)
 
-	r.Post("/", h.CreateShortURL)
+	r.
+		With(middleware.ContentTypeMiddleware([]string{
+			ContentTypePlainText,
+			ContentTypeGzip,
+		})).
+		Post("/", h.CreateShortURL)
 	r.Get("/*", h.RedirectToOriginal)
 	r.MethodNotAllowed(methodNotAllowed)
 }

@@ -25,19 +25,8 @@ type ShortenResponse struct {
 }
 
 func (h Handler) CreateShortURL(w http.ResponseWriter, r *http.Request) {
-	if r.Header.Get("Content-Type") != ContentTypeJSON {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-
-	if r.Header.Get("Content-Type") != ContentTypeJSON &&
-		r.Header.Get("Content-Type") != ContentTypeGzip {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
