@@ -9,6 +9,9 @@ import (
 )
 
 func (r *Repository) Save(id string, url string) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	for _, record := range r.records {
 		if record.ShortURL == id {
 			return nil

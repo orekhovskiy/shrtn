@@ -25,7 +25,9 @@ func Run(opts *config.Config) {
 		}
 	}()
 
-	repo, err := urlrepo.NewRepository(*opts)
+	repo := urlrepo.NewRepository(*opts)
+
+	err = repo.LoadAll()
 	if err != nil {
 		panic(fmt.Sprintf("unable to load records from storage: %v", err))
 	}

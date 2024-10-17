@@ -1,9 +1,7 @@
 package urlrepo
 
 import (
-	"bufio"
-	"encoding/json"
-	"os"
+	"sync"
 
 	"github.com/orekhovskiy/shrtn/config"
 )
@@ -17,38 +15,12 @@ type URLRecord struct {
 type Repository struct {
 	records  []URLRecord
 	filePath string
+	mu       sync.RWMutex
 }
 
-func loadAll(filePath string) ([]URLRecord, error) {
-	file, err := os.Open(filePath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return []URLRecord{}, nil
-		}
-		return []URLRecord{}, err
-	}
-	defer file.Close()
-
-	var records []URLRecord
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		var record URLRecord
-		err := json.Unmarshal(scanner.Bytes(), &record)
-		if err != nil {
-			return []URLRecord{}, err
-		}
-		records = append(records, record)
-	}
-	return records, scanner.Err()
-}
-
-func NewRepository(opts config.Config) (*Repository, error) {
-	urlMapping, err := loadAll(opts.FilePath)
-	if err != nil {
-		return nil, err
-	}
+func NewRepository(opts config.Config) *Repository {
 	return &Repository{
-		records:  urlMapping,
+		records:  []URLRecord{},
 		filePath: opts.FilePath,
-	}, nil
+	}
 }
