@@ -1,12 +1,26 @@
 package urlrepo
 
-type Repository struct {
-	urlMapping map[string]string
+import (
+	"sync"
+
+	"github.com/orekhovskiy/shrtn/config"
+)
+
+type URLRecord struct {
+	UUID        string `json:"uuid"`
+	ShortURL    string `json:"short_url"`
+	OriginalURL string `json:"original_url"`
 }
 
-func NewRepository() Repository {
-	urlMapping := make(map[string]string)
-	return Repository{
-		urlMapping: urlMapping,
+type Repository struct {
+	records  map[string]URLRecord
+	filePath string
+	mu       sync.RWMutex
+}
+
+func NewRepository(opts config.Config) *Repository {
+	return &Repository{
+		records:  make(map[string]URLRecord),
+		filePath: opts.FilePath,
 	}
 }

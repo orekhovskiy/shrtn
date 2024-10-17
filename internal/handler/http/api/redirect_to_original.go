@@ -1,9 +1,10 @@
 package api
 
 import (
-	"log"
 	"net/http"
 	"strings"
+
+	"go.uber.org/zap"
 )
 
 func (h Handler) RedirectToOriginal(w http.ResponseWriter, r *http.Request) {
@@ -11,11 +12,16 @@ func (h Handler) RedirectToOriginal(w http.ResponseWriter, r *http.Request) {
 	originalURL, err := h.urlService.GetByID(id)
 
 	if err != nil {
-		log.Printf("error getting original url by id %s: %v", id, err)
+		h.logger.Error("error getting original url by id",
+			zap.String("id", id),
+			zap.Error(err),
+		)
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
 
-	log.Printf("Redirecting to %s", originalURL)
+	h.logger.Info("redirecting",
+		zap.String("url", originalURL),
+	)
 	http.Redirect(w, r, originalURL, http.StatusTemporaryRedirect)
 }

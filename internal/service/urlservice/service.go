@@ -1,14 +1,15 @@
 package urlservice
 
-import (
-	repo "github.com/orekhovskiy/shrtn/internal/adapter/maprepo/urlrepo"
-)
-
-type Service struct {
-	urlRepository repo.Repository
+type Repository interface {
+	Save(id string, url string) error
+	GetByID(id string) (string, error)
 }
 
-func NewService(urlRepository repo.Repository) *Service {
+type Service struct {
+	urlRepository Repository
+}
+
+func NewService(urlRepository Repository) *Service {
 	return &Service{
 		urlRepository: urlRepository,
 	}
