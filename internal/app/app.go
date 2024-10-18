@@ -45,7 +45,7 @@ func Run(opts *config.Config) {
 
 	service := urlservice.NewService(repo)
 	apiHandler := api.NewHandler(zapLogger, opts, service)
-	shortenHandler := shorten.NewHandler(zapLogger, opts, *service)
+	shortenHandler := shorten.NewHandler(zapLogger, opts, service)
 
 	router := http.NewRouter()
 	router.

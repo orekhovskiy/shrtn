@@ -1,6 +1,9 @@
 package mocks
 
-import "github.com/stretchr/testify/mock"
+import (
+	"github.com/orekhovskiy/shrtn/internal/entity"
+	"github.com/stretchr/testify/mock"
+)
 
 // Mocking the URL service
 type MockURLService struct {
@@ -19,4 +22,12 @@ func (m *MockURLService) GetByID(id string) (string, error) {
 
 func (m *MockURLService) Ping() error {
 	return nil
+}
+func (m *MockURLService) ProcessBatch(batchRequests []entity.BatchRequest) ([]entity.BatchResponse, error) {
+	args := m.Called(batchRequests)
+
+	if resp, ok := args.Get(0).([]entity.BatchResponse); ok {
+		return resp, args.Error(1)
+	}
+	return []entity.BatchResponse{}, args.Error(1)
 }
