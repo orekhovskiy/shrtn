@@ -34,7 +34,7 @@ func TestBatch(t *testing.T) {
 				{CorrelationID: "2", ShortURL: "short2"},
 			},
 			mockErr:      nil,
-			expectedCode: http.StatusOK,
+			expectedCode: http.StatusCreated,
 			expectedOutput: []entity.BatchResponse{
 				{CorrelationID: "1", ShortURL: "short1"},
 				{CorrelationID: "2", ShortURL: "short2"},
@@ -87,7 +87,7 @@ func TestBatch(t *testing.T) {
 
 			assert.Equal(t, tt.expectedCode, rr.Code)
 
-			if tt.expectedCode == http.StatusOK {
+			if tt.expectedCode == http.StatusCreated {
 				var actualResponse []entity.BatchResponse
 				err := json.Unmarshal(rr.Body.Bytes(), &actualResponse)
 				assert.NoError(t, err)
