@@ -40,15 +40,20 @@ func (r *Repository) SaveMany(records []entity.URLRecord) ([]entity.URLRecord, e
 
 	rows, err := tx.Query(sqlQuery, args...)
 	if err != nil {
-		tx.Rollback()
+		err := tx.Rollback()
+		if err != nil {
+			return nil, err
+		}
 		return nil, err
 	}
-	defer rows.Close()
 
 	for rows.Next() {
 		var insertedRecord entity.URLRecord
 		if err := rows.Scan(&insertedRecord.UUID, &insertedRecord.ShortURL, &insertedRecord.OriginalURL); err != nil {
-			tx.Rollback()
+			err := tx.Rollback()
+			if err != nil {
+				return nil, err
+			}
 			return nil, err
 		}
 		insertedRecords = append(insertedRecords, insertedRecord)
