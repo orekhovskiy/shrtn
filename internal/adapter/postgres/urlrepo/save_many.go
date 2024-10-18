@@ -59,6 +59,10 @@ func (r *Repository) SaveMany(records []entity.URLRecord) ([]entity.URLRecord, e
 		insertedRecords = append(insertedRecords, insertedRecord)
 	}
 
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
