@@ -3,6 +3,7 @@ package urlrepo
 import (
 	"bufio"
 	"encoding/json"
+	"github.com/orekhovskiy/shrtn/internal/entity"
 	"os"
 
 	"github.com/google/uuid"
@@ -16,7 +17,7 @@ func (r *Repository) Save(id string, url string) error {
 		return nil
 	}
 
-	record := URLRecord{
+	record := entity.URLRecord{
 		UUID:        uuid.New().String(),
 		ShortURL:    id,
 		OriginalURL: url,
