@@ -3,6 +3,7 @@ package urlservice
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/orekhovskiy/shrtn/internal/entity"
 )
@@ -34,7 +35,7 @@ func (s *Service) ProcessBatch(batch []entity.BatchRequest) ([]entity.BatchRespo
 			}
 		}
 		responses = append(responses, entity.BatchResponse{
-			ShortURL:      record.ShortURL,
+			ShortURL:      fmt.Sprintf("%s/%s", s.options.BaseURL, record.ShortURL),
 			CorrelationID: correlationID,
 		})
 	}

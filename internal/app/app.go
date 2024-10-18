@@ -43,7 +43,7 @@ func Run(opts *config.Config) {
 		}
 	}
 
-	service := urlservice.NewService(repo)
+	service := urlservice.NewService(*opts, repo)
 	apiHandler := api.NewHandler(zapLogger, opts, service)
 	shortenHandler := shorten.NewHandler(zapLogger, opts, service)
 

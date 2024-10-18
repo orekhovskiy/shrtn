@@ -1,6 +1,9 @@
 package urlservice
 
-import "github.com/orekhovskiy/shrtn/internal/entity"
+import (
+	"github.com/orekhovskiy/shrtn/config"
+	"github.com/orekhovskiy/shrtn/internal/entity"
+)
 
 type Repository interface {
 	Save(id string, url string) error
@@ -11,10 +14,12 @@ type Repository interface {
 
 type Service struct {
 	urlRepository Repository
+	options       config.Config
 }
 
-func NewService(urlRepository Repository) *Service {
+func NewService(opts config.Config, urlRepository Repository) *Service {
 	return &Service{
+		options:       opts,
 		urlRepository: urlRepository,
 	}
 }
