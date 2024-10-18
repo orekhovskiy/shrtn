@@ -1,7 +1,9 @@
 package api
 
 import (
+	"errors"
 	"fmt"
+	e "github.com/orekhovskiy/shrtn/internal/errors"
 	"io"
 	"net/http"
 	"net/url"
@@ -35,11 +37,26 @@ func (h Handler) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 
 	id, err := h.urlService.Save(originalURL)
 	if err != nil {
-		h.logger.Error("error while saving url",
-			zap.String("url", originalURL),
-			zap.Error(err),
-		)
-		http.Error(w, "Internal error", http.StatusInternalServerError)
+		var err *e.URLConflictError
+		switch {
+		case errors.As(err, &err):
+			shortURL := fmt.Sprintf("%s/%s", h.opts.BaseURL, err.ShortURL)
+			w.WriteHeader(http.StatusConflict)
+			w.Header().Set("Content-Type", ContentTypePlainText)
+			_, err := w.Write([]byte(shortURL))
+			if err != nil {
+				http.Error(w, "Internal Error", http.StatusInternalServerError)
+				return
+			}
+			return
+		default:
+			h.logger.Error("error while saving url",
+				zap.String("url", originalURL),
+				zap.Error(err),
+			)
+			http.Error(w, "Internal Error", http.StatusInternalServerError)
+			return
+		}
 	}
 	shortURL := fmt.Sprintf("%s/%s", h.opts.BaseURL, id)
 
