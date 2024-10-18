@@ -3,6 +3,8 @@ package urlrepo
 import (
 	"bufio"
 	"encoding/json"
+	"github.com/orekhovskiy/shrtn/internal/entity"
+	e "github.com/orekhovskiy/shrtn/internal/errors"
 	"os"
 
 	"github.com/google/uuid"
@@ -13,10 +15,13 @@ func (r *Repository) Save(id string, url string) error {
 	defer r.mu.Unlock()
 
 	if _, exists := r.records[id]; exists {
-		return nil
+		return &e.URLConflictError{
+			ShortURL:    id,
+			OriginalURL: url,
+		}
 	}
 
-	record := URLRecord{
+	record := entity.URLRecord{
 		UUID:        uuid.New().String(),
 		ShortURL:    id,
 		OriginalURL: url,

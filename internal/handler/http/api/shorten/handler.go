@@ -2,12 +2,14 @@ package shorten
 
 import (
 	"github.com/orekhovskiy/shrtn/config"
+	"github.com/orekhovskiy/shrtn/internal/entity"
 	"github.com/orekhovskiy/shrtn/internal/logger"
 )
 
 type Service interface {
 	GetByID(id string) (url string, err error)
 	Save(url string) (id string, err error)
+	ProcessBatch(batchRequests []entity.BatchRequest) (batchResponses []entity.BatchResponse, err error)
 }
 
 type Handler struct {

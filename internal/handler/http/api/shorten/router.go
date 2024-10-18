@@ -13,4 +13,11 @@ func (h *Handler) AddRoutes(r *chi.Mux) {
 			ContentTypeGzip,
 		})).
 		Post("/api/shorten", h.CreateShortURL)
+
+	r.
+		With(middleware.ContentTypeMiddleware([]string{
+			ContentTypeJSON,
+			ContentTypeGzip,
+		})).
+		Post("/api/shorten/batch", h.Batch)
 }
