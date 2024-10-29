@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (r *Repository) Save(id string, url string) error {
+func (r *FileURLRepository) Save(id string, url string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

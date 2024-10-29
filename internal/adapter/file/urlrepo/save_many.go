@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func (r *Repository) SaveMany(records []entity.URLRecord) ([]entity.URLRecord, error) {
+func (r *FileURLRepository) SaveMany(records []entity.URLRecord) ([]entity.URLRecord, error) {
 	if len(records) == 0 {
 		return make([]entity.URLRecord, 0), nil
 	}

@@ -6,11 +6,11 @@ import (
 	"github.com/orekhovskiy/shrtn/config"
 )
 
-type Repository struct {
+type PostgresURLRepository struct {
 	db *sql.DB
 }
 
-func NewRepository(config config.Config) (*Repository, error) {
+func NewRepository(config config.Config) (*PostgresURLRepository, error) {
 	db, err := sql.Open("pgx", config.DatabaseDSN)
 	if err != nil {
 		return nil, err
@@ -20,5 +20,5 @@ func NewRepository(config config.Config) (*Repository, error) {
 		return nil, err
 	}
 
-	return &Repository{db: db}, nil
+	return &PostgresURLRepository{db: db}, nil
 }

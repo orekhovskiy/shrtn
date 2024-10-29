@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-func (r *Repository) GetByID(id string) (string, error) {
+func (r *PostgresURLRepository) GetByID(id string) (string, error) {
 	var originalURL string
 	err := r.db.QueryRow(getRecordByID, id).Scan(&originalURL)
 	if err != nil {

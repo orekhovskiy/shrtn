@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func (r *Repository) SaveMany(records []entity.URLRecord) ([]entity.URLRecord, error) {
+func (r *PostgresURLRepository) SaveMany(records []entity.URLRecord) ([]entity.URLRecord, error) {
 	if len(records) == 0 {
 		return nil, nil
 	}

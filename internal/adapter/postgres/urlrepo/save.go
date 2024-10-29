@@ -6,7 +6,7 @@ import (
 	e "github.com/orekhovskiy/shrtn/internal/errors"
 )
 
-func (r *Repository) Save(id string, url string) error {
+func (r *PostgresURLRepository) Save(id string, url string) error {
 	var existingShortURL string
 	err := r.db.QueryRow(`SELECT short_url FROM url_records WHERE original_url = $1`, url).Scan(&existingShortURL)
 	if err == nil {
