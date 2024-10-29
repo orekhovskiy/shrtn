@@ -4,23 +4,18 @@ import (
 	"sync"
 
 	"github.com/orekhovskiy/shrtn/config"
+	"github.com/orekhovskiy/shrtn/internal/entity"
 )
 
-type URLRecord struct {
-	UUID        string `json:"uuid"`
-	ShortURL    string `json:"short_url"`
-	OriginalURL string `json:"original_url"`
-}
-
 type Repository struct {
-	records  map[string]URLRecord
+	records  map[string]entity.URLRecord
 	filePath string
 	mu       sync.RWMutex
 }
 
 func NewRepository(opts config.Config) *Repository {
 	return &Repository{
-		records:  make(map[string]URLRecord),
+		records:  make(map[string]entity.URLRecord),
 		filePath: opts.FilePath,
 	}
 }

@@ -3,6 +3,7 @@ package urlrepo
 import (
 	"bufio"
 	"encoding/json"
+	"github.com/orekhovskiy/shrtn/internal/entity"
 	"os"
 )
 
@@ -19,10 +20,10 @@ func (r *Repository) LoadAll() error {
 	}
 	defer file.Close()
 
-	records := make(map[string]URLRecord)
+	records := make(map[string]entity.URLRecord)
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		var record URLRecord
+		var record entity.URLRecord
 		err := json.Unmarshal(scanner.Bytes(), &record)
 		if err != nil {
 			return err
