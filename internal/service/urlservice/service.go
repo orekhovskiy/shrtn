@@ -12,13 +12,13 @@ type Repository interface {
 	SaveMany([]entity.URLRecord) ([]entity.URLRecord, error)
 }
 
-type Service struct {
+type URLShortenerService struct {
 	urlRepository Repository
 	options       config.Config
 }
 
-func NewService(opts config.Config, urlRepository Repository) *Service {
-	return &Service{
+func NewService(opts config.Config, urlRepository Repository) *URLShortenerService {
+	return &URLShortenerService{
 		options:       opts,
 		urlRepository: urlRepository,
 	}

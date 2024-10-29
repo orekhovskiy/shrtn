@@ -1,6 +1,6 @@
 package urlservice
 
-func (s Service) GetByID(id string) (string, error) {
+func (s URLShortenerService) GetByID(id string) (string, error) {
 	url, err := s.urlRepository.GetByID(id)
 
 	if err != nil {

@@ -8,7 +8,7 @@ import (
 	"github.com/orekhovskiy/shrtn/internal/entity"
 )
 
-func (s *Service) ProcessBatch(batch []entity.BatchRequest) ([]entity.BatchResponse, error) {
+func (s *URLShortenerService) ProcessBatch(batch []entity.BatchRequest) ([]entity.BatchResponse, error) {
 	records := make([]entity.URLRecord, len(batch))
 	responses := make([]entity.BatchResponse, 0)
 
