@@ -9,6 +9,7 @@ type Service interface {
 	GetByID(id string) (url string, err error)
 	Save(url string) (id string, err error)
 	Ping() error
+	BuildURL(uri string) string
 }
 
 type Handler struct {

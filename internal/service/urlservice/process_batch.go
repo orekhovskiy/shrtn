@@ -1,44 +1,56 @@
 package urlservice
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
-	"fmt"
 	"github.com/google/uuid"
 	"github.com/orekhovskiy/shrtn/internal/entity"
 )
 
 func (s *URLShortenerService) ProcessBatch(batch []entity.BatchRequest) ([]entity.BatchResponse, error) {
-	records := make([]entity.URLRecord, len(batch))
-	responses := make([]entity.BatchResponse, 0)
+	correlationMap := buildCorrelationMap(batch)
+	records := s.generateURLRecords(batch)
 
-	for i, req := range batch {
-		hash := sha256.Sum256([]byte(req.OriginalURL))
-		shortURL := hex.EncodeToString(hash[:])[:7]
-		records[i] = entity.URLRecord{
-			UUID:        uuid.New().String(),
-			OriginalURL: req.OriginalURL,
-			ShortURL:    shortURL,
-		}
-	}
 	savedRecords, err := s.urlRepository.SaveMany(records)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, record := range savedRecords {
-		var correlationID string
-		for _, req := range batch {
-			if req.OriginalURL == record.OriginalURL {
-				correlationID = req.CorrelationID
-				break
-			}
+	responses := buildBatchResponses(savedRecords, correlationMap, s.BuildURL)
+	return responses, nil
+}
+
+func buildCorrelationMap(batch []entity.BatchRequest) map[string]string {
+	correlationMap := make(map[string]string, len(batch))
+	for _, req := range batch {
+		correlationMap[req.OriginalURL] = req.CorrelationID
+	}
+	return correlationMap
+}
+
+func (s *URLShortenerService) generateURLRecords(batch []entity.BatchRequest) []entity.URLRecord {
+	records := make([]entity.URLRecord, len(batch))
+	for i, req := range batch {
+
+		records[i] = entity.URLRecord{
+			UUID:        uuid.New().String(),
+			OriginalURL: req.OriginalURL,
+			ShortURL:    s.createShortURL(req.OriginalURL),
 		}
+	}
+	return records
+}
+
+func buildBatchResponses(
+	records []entity.URLRecord,
+	correlationMap map[string]string,
+	buildURL func(string) string,
+) []entity.BatchResponse {
+	responses := make([]entity.BatchResponse, 0, len(records))
+	for _, record := range records {
+		correlationID := correlationMap[record.OriginalURL]
 		responses = append(responses, entity.BatchResponse{
-			ShortURL:      fmt.Sprintf("%s/%s", s.options.BaseURL, record.ShortURL),
+			ShortURL:      buildURL(record.ShortURL),
 			CorrelationID: correlationID,
 		})
 	}
-
-	return responses, nil
+	return responses
 }

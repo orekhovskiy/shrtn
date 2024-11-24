@@ -2,7 +2,6 @@ package shorten
 
 import (
 	"encoding/json"
-	"fmt"
 	e "github.com/orekhovskiy/shrtn/internal/errors"
 	"io"
 	"net/http"
@@ -52,7 +51,7 @@ func (h Handler) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 	id, err := h.urlService.Save(originalURL)
 	if err != nil {
 		if urlConflictError, ok := err.(*e.URLConflictError); ok {
-			shortURL := fmt.Sprintf("%s/%s", h.opts.BaseURL, urlConflictError.ShortURL)
+			shortURL := h.urlService.BuildURL(urlConflictError.ShortURL)
 			response := ShortenResponse{Result: shortURL}
 			w.Header().Set("Content-Type", ContentTypeJSON)
 			w.WriteHeader(http.StatusConflict)
@@ -70,7 +69,7 @@ func (h Handler) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	shortURL := fmt.Sprintf("%s/%s", h.opts.BaseURL, id)
+	shortURL := h.urlService.BuildURL(id)
 	response := ShortenResponse{Result: shortURL}
 	w.Header().Set("Content-Type", ContentTypeJSON)
 	w.WriteHeader(http.StatusCreated)
