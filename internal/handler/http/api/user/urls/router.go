@@ -12,6 +12,6 @@ const (
 
 func (h *Handler) AddRoutes(r *chi.Mux) {
 	r.
-		With(middleware.AuthMiddleware(h.opts, h.logger, false)).
+		With(middleware.AuthMiddleware(h.opts, h.logger, true)).
 		Get("/api/user/urls", h.getUserURLs)
 }
