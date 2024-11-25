@@ -43,8 +43,13 @@ func (r *FileURLRepository) SaveMany(records []entity.URLRecord, userID string) 
 		if _, err := writer.WriteString(string(data) + "\n"); err != nil {
 			return nil, err
 		}
+		r.records[record.ShortURL] = record
 		responses = append(responses, record)
 	}
 
-	return responses, writer.Flush()
+	if err := writer.Flush(); err != nil {
+		return nil, err
+	}
+
+	return responses, nil
 }

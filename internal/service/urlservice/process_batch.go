@@ -1,6 +1,7 @@
 package urlservice
 
 import (
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/orekhovskiy/shrtn/internal/entity"
 )
@@ -8,6 +9,10 @@ import (
 func (s *URLShortenerService) ProcessBatch(batch []entity.BatchRequest, userID string) ([]entity.BatchResponse, error) {
 	correlationMap := buildCorrelationMap(batch)
 	records := s.generateURLRecords(batch)
+
+	fmt.Println(correlationMap)
+	fmt.Println(records)
+	fmt.Println(batch)
 
 	savedRecords, err := s.urlRepository.SaveMany(records, userID)
 	if err != nil {
