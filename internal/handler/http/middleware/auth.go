@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"github.com/orekhovskiy/shrtn/internal/logger"
+	"go.uber.org/zap"
 	"net/http"
 	"time"
 
@@ -15,11 +16,17 @@ import (
 
 const CookieName = "auth_token"
 
-func AuthMiddleware(options config.Config, logger logger.Logger) func(http.Handler) http.Handler {
+func AuthMiddleware(options config.Config, logger logger.Logger, toRequireAuth bool) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cookie, err := r.Cookie(CookieName)
-			if err != nil || cookie.Value == "" {
+			// Handle missing or empty cookie
+			if cookie == nil || cookie.Value == "" || err != nil {
+				if toRequireAuth {
+					logger.Info("no auth cookie provided on protected route", zap.String("uri", r.RequestURI))
+					http.Error(w, "Unauthorized", http.StatusUnauthorized)
+					return
+				}
 				// Cookie is empty or not existing, generate a new one
 				userID := issueNewToken(w, options.JWTSecretKey)
 				ctx := context.WithValue(r.Context(), authservice.UserIDKey, userID)
@@ -27,13 +34,18 @@ func AuthMiddleware(options config.Config, logger logger.Logger) func(http.Handl
 				return
 			}
 
-			// Check for JWT from Cookie
+			// Parse JWT from cookie
 			claims := jwt.MapClaims{}
 			token, err := jwt.ParseWithClaims(cookie.Value, claims, func(token *jwt.Token) (interface{}, error) {
 				return []byte(options.JWTSecretKey), nil
 			})
 
 			if err != nil || !token.Valid {
+				if toRequireAuth {
+					logger.Info("invalid auth cookie provided on protected route", zap.String("uri", r.RequestURI))
+					http.Error(w, "Unauthorized", http.StatusUnauthorized)
+					return
+				}
 				// Cookie is not valid, generate a new one
 				userID := issueNewToken(w, options.JWTSecretKey)
 				ctx := context.WithValue(r.Context(), authservice.UserIDKey, userID)

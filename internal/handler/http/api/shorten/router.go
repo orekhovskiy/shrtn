@@ -8,6 +8,7 @@ import (
 
 func (h *Handler) AddRoutes(r *chi.Mux) {
 	r.
+		With(middleware.AuthMiddleware(h.opts, h.logger, false)).
 		With(middleware.ContentTypeMiddleware([]string{
 			ContentTypeJSON,
 			ContentTypeGzip,
@@ -15,6 +16,7 @@ func (h *Handler) AddRoutes(r *chi.Mux) {
 		Post("/api/shorten", h.CreateShortURL)
 
 	r.
+		With(middleware.AuthMiddleware(h.opts, h.logger, false)).
 		With(middleware.ContentTypeMiddleware([]string{
 			ContentTypeJSON,
 			ContentTypeGzip,
