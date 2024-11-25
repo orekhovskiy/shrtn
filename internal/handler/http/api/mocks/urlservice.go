@@ -37,3 +37,11 @@ func (m *MockURLService) BuildURL(uri string) string {
 	args := m.Called(uri)
 	return args.String(0)
 }
+
+func (m *MockURLService) GetUserURLs(userID string) ([]entity.URLRecord, error) {
+	args := m.Called(userID)
+	if urls, ok := args.Get(0).([]entity.URLRecord); ok {
+		return urls, args.Error(1)
+	}
+	return nil, args.Error(1)
+}

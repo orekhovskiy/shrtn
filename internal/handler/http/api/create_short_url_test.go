@@ -7,20 +7,26 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/orekhovskiy/shrtn/internal/handler/http/api/mocks"
-
-	"github.com/orekhovskiy/shrtn/internal/logger"
-
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/orekhovskiy/shrtn/config"
+	"github.com/orekhovskiy/shrtn/internal/handler/http/api/mocks"
+	"github.com/orekhovskiy/shrtn/internal/logger"
 )
 
 func TestCreateShortUrl(t *testing.T) {
 	mockLogger := &logger.NoopLogger{}
-	mockService := new(mocks.MockURLService)
+	mockURLService := new(mocks.MockURLService)
+	mockAuthService := new(mocks.MockAuthService)
 	opts := config.Config{BaseURL: "http://localhost:8080"}
-	handler := Handler{logger: mockLogger, opts: opts, urlService: mockService}
+
+	handler := Handler{
+		logger:      mockLogger,
+		opts:        opts,
+		urlService:  mockURLService,
+		authService: mockAuthService,
+	}
 
 	tests := []struct {
 		name           string
@@ -52,14 +58,21 @@ func TestCreateShortUrl(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// Set expectations for mock URL service
 			if tt.mockSaveReturn != "" {
-				mockService.On("Save", tt.body).Return(tt.mockSaveReturn)
+				mockURLService.On("Save", tt.body, mock.Anything).Return(tt.mockSaveReturn, nil)
 			}
+
+			mockAuthService.On("GetUserIDFromContext", mock.Anything).Return("testuser", true)
+			mockURLService.On("BuildURL", "12345").Return("http://localhost:8080/12345")
 
 			req := httptest.NewRequest(tt.method, "/shorten", strings.NewReader(tt.body))
 			req.Header.Set("Content-Type", tt.contentType)
 
 			rec := httptest.NewRecorder()
+
+			assert.NotNil(t, handler.urlService, "URL service should not be nil")
+			assert.NotNil(t, handler.authService, "Auth service should not be nil")
 
 			handler.CreateShortURL(rec, req)
 
