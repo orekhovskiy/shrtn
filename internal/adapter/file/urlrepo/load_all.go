@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func (r *Repository) LoadAll() error {
+func (r *FileURLRepository) LoadAll() error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

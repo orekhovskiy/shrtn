@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	e "github.com/orekhovskiy/shrtn/internal/errors"
 	"io"
 	"net/http"
@@ -34,10 +33,17 @@ func (h Handler) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := h.urlService.Save(originalURL)
+	userID, ok := h.authService.GetUserIDFromContext(r.Context())
+	if !ok {
+		h.logger.Info("no user ID provided, rejecting")
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	id, err := h.urlService.Save(originalURL, userID)
 	if err != nil {
 		if urlConflictError, ok := err.(*e.URLConflictError); ok {
-			shortURL := fmt.Sprintf("%s/%s", h.opts.BaseURL, urlConflictError.ShortURL)
+			shortURL := h.urlService.BuildURL(urlConflictError.ShortURL)
 			w.Header().Set("Content-Type", ContentTypePlainText)
 			w.WriteHeader(http.StatusConflict)
 			_, err = w.Write([]byte(shortURL))
@@ -54,7 +60,7 @@ func (h Handler) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Error", http.StatusInternalServerError)
 		return
 	}
-	shortURL := fmt.Sprintf("%s/%s", h.opts.BaseURL, id)
+	shortURL := h.urlService.BuildURL(id)
 
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", ContentTypePlainText)

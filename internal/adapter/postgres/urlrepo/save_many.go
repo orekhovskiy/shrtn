@@ -1,13 +1,15 @@
 package urlrepo
 
 import (
-	"github.com/google/uuid"
-	"github.com/orekhovskiy/shrtn/internal/entity"
 	"strconv"
 	"strings"
+
+	"github.com/google/uuid"
+
+	"github.com/orekhovskiy/shrtn/internal/entity"
 )
 
-func (r *Repository) SaveMany(records []entity.URLRecord) ([]entity.URLRecord, error) {
+func (r *PostgresURLRepository) SaveMany(records []entity.URLRecord, userID string) ([]entity.URLRecord, error) {
 	if len(records) == 0 {
 		return nil, nil
 	}
@@ -25,14 +27,15 @@ func (r *Repository) SaveMany(records []entity.URLRecord) ([]entity.URLRecord, e
 		if record.UUID == "" {
 			record.UUID = uuid.New().String()
 		}
+		record.UserID = userID
 
 		values = append(values,
-			"($"+strconv.Itoa(i*3+1)+", $"+strconv.Itoa(i*3+2)+", $"+strconv.Itoa(i*3+3)+")")
-		args = append(args, record.UUID, record.ShortURL, record.OriginalURL)
+			"($"+strconv.Itoa(i*4+1)+", $"+strconv.Itoa(i*4+2)+", $"+strconv.Itoa(i*4+3)+", $"+strconv.Itoa(i*4+4)+")")
+		args = append(args, record.UUID, record.ShortURL, record.OriginalURL, record.UserID)
 	}
 
 	sqlQuery := `
-        INSERT INTO url_records (uuid, short_url, original_url)
+        INSERT INTO url_records (uuid, short_url, original_url, user_id)
         VALUES ` + strings.Join(values, ", ") + `
         ON CONFLICT (short_url) DO NOTHING
         RETURNING uuid, short_url, original_url
@@ -49,7 +52,11 @@ func (r *Repository) SaveMany(records []entity.URLRecord) ([]entity.URLRecord, e
 
 	for rows.Next() {
 		var insertedRecord entity.URLRecord
-		if err := rows.Scan(&insertedRecord.UUID, &insertedRecord.ShortURL, &insertedRecord.OriginalURL); err != nil {
+		if err := rows.Scan(
+			&insertedRecord.UUID,
+			&insertedRecord.ShortURL,
+			&insertedRecord.OriginalURL,
+		); err != nil {
 			err := tx.Rollback()
 			if err != nil {
 				return nil, err

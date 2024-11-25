@@ -1,5 +1,5 @@
 package urlservice
 
-func (s *Service) Ping() error {
+func (s *URLShortenerService) Ping() error {
 	return s.urlRepository.Ping()
 }

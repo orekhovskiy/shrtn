@@ -27,7 +27,14 @@ func (h *Handler) Batch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responses, err := h.urlService.ProcessBatch(batchRequests)
+	userID, ok := h.authService.GetUserIDFromContext(r.Context())
+	if !ok {
+		h.logger.Info("no user ID provided, rejecting")
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	responses, err := h.urlService.ProcessBatch(batchRequests, userID)
 	if err != nil {
 		h.logger.Error("failed to process batch",
 			zap.Error(err))

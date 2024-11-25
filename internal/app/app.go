@@ -11,7 +11,9 @@ import (
 	"github.com/orekhovskiy/shrtn/internal/handler/http"
 	"github.com/orekhovskiy/shrtn/internal/handler/http/api"
 	"github.com/orekhovskiy/shrtn/internal/handler/http/api/shorten"
+	userurls "github.com/orekhovskiy/shrtn/internal/handler/http/api/user/urls"
 	"github.com/orekhovskiy/shrtn/internal/logger"
+	"github.com/orekhovskiy/shrtn/internal/service/authservice"
 	"github.com/orekhovskiy/shrtn/internal/service/urlservice"
 )
 
@@ -43,14 +45,17 @@ func Run(opts *config.Config) {
 		}
 	}
 
-	service := urlservice.NewService(*opts, repo)
-	apiHandler := api.NewHandler(zapLogger, opts, service)
-	shortenHandler := shorten.NewHandler(zapLogger, opts, service)
+	urlService := urlservice.NewService(*opts, repo)
+	authService := authservice.NewService(*opts)
+	apiHandler := api.NewHandler(zapLogger, opts, urlService, authService)
+	shortenHandler := shorten.NewHandler(zapLogger, opts, urlService, authService)
+	userURLsHandler := userurls.NewHandler(zapLogger, opts, urlService, authService)
 
 	router := http.NewRouter()
 	router.
 		WithHandler(apiHandler).
-		WithHandler(shortenHandler)
+		WithHandler(shortenHandler).
+		WithHandler(userURLsHandler)
 
 	server := http.NewServer(opts)
 	server.RegisterRoutes(router)

@@ -4,6 +4,6 @@ import (
 	"errors"
 )
 
-func (r *Repository) Ping() error {
+func (r *FileURLRepository) Ping() error {
 	return errors.New("no database connection")
 }

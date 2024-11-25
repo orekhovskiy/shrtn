@@ -1,5 +1,5 @@
 package urlrepo
 
-func (r *Repository) Ping() error {
+func (r *PostgresURLRepository) Ping() error {
 	return r.db.Ping()
 }

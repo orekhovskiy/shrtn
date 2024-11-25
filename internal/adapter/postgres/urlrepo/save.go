@@ -6,9 +6,9 @@ import (
 	e "github.com/orekhovskiy/shrtn/internal/errors"
 )
 
-func (r *Repository) Save(id string, url string) error {
+func (r *PostgresURLRepository) Save(id string, url string, userID string) error {
 	var existingShortURL string
-	err := r.db.QueryRow(`SELECT short_url FROM url_records WHERE original_url = $1`, url).Scan(&existingShortURL)
+	err := r.db.QueryRow(isRecordExists, url).Scan(&existingShortURL)
 	if err == nil {
 		return &e.URLConflictError{
 			ShortURL:    existingShortURL,
@@ -19,9 +19,8 @@ func (r *Repository) Save(id string, url string) error {
 	}
 
 	_, err = r.db.Exec(
-		`INSERT INTO url_records (uuid, short_url, original_url)
-		 VALUES ($1, $2, $3)`,
-		uuid.New().String(), id, url)
+		insertRecord,
+		uuid.New().String(), id, url, userID)
 
 	if err != nil {
 		fmt.Println("error while inserting URL:", err)

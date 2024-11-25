@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func (r *Repository) GetByID(id string) (string, error) {
+func (r *FileURLRepository) GetByID(id string) (string, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
