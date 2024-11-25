@@ -1,10 +1,12 @@
 package urlrepo
 
 import (
-	"github.com/google/uuid"
-	"github.com/orekhovskiy/shrtn/internal/entity"
 	"strconv"
 	"strings"
+
+	"github.com/google/uuid"
+
+	"github.com/orekhovskiy/shrtn/internal/entity"
 )
 
 func (r *PostgresURLRepository) SaveMany(records []entity.URLRecord, userID string) ([]entity.URLRecord, error) {
@@ -50,7 +52,11 @@ func (r *PostgresURLRepository) SaveMany(records []entity.URLRecord, userID stri
 
 	for rows.Next() {
 		var insertedRecord entity.URLRecord
-		if err := rows.Scan(&insertedRecord.UUID, &insertedRecord.ShortURL, &insertedRecord.OriginalURL, nil); err != nil {
+		if err := rows.Scan(
+			&insertedRecord.UUID,
+			&insertedRecord.ShortURL,
+			&insertedRecord.OriginalURL,
+		); err != nil {
 			err := tx.Rollback()
 			if err != nil {
 				return nil, err
