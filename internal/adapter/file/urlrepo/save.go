@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (r *FileURLRepository) Save(id string, url string) error {
+func (r *FileURLRepository) Save(id string, url string, userID string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -25,6 +25,7 @@ func (r *FileURLRepository) Save(id string, url string) error {
 		UUID:        uuid.New().String(),
 		ShortURL:    id,
 		OriginalURL: url,
+		UserID:      userID,
 	}
 
 	r.records[id] = record

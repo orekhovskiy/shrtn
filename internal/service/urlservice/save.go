@@ -1,8 +1,8 @@
 package urlservice
 
-func (s URLShortenerService) Save(url string) (string, error) {
+func (s URLShortenerService) Save(url string, userID string) (string, error) {
 	id := s.createShortURL(url)
-	err := s.urlRepository.Save(id, url)
+	err := s.urlRepository.Save(id, url, userID)
 	if err != nil {
 		return "", err
 	}

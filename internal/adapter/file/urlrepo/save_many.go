@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func (r *FileURLRepository) SaveMany(records []entity.URLRecord) ([]entity.URLRecord, error) {
+func (r *FileURLRepository) SaveMany(records []entity.URLRecord, userID string) ([]entity.URLRecord, error) {
 	if len(records) == 0 {
 		return make([]entity.URLRecord, 0), nil
 	}
@@ -32,6 +32,8 @@ func (r *FileURLRepository) SaveMany(records []entity.URLRecord) ([]entity.URLRe
 		if record.UUID == "" {
 			record.UUID = uuid.New().String()
 		}
+
+		record.UserID = userID
 
 		data, err := json.Marshal(record)
 		if err != nil {

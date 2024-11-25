@@ -5,11 +5,11 @@ import (
 	"github.com/orekhovskiy/shrtn/internal/entity"
 )
 
-func (s *URLShortenerService) ProcessBatch(batch []entity.BatchRequest) ([]entity.BatchResponse, error) {
+func (s *URLShortenerService) ProcessBatch(batch []entity.BatchRequest, userID string) ([]entity.BatchResponse, error) {
 	correlationMap := buildCorrelationMap(batch)
 	records := s.generateURLRecords(batch)
 
-	savedRecords, err := s.urlRepository.SaveMany(records)
+	savedRecords, err := s.urlRepository.SaveMany(records, userID)
 	if err != nil {
 		return nil, err
 	}

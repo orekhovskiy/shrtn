@@ -10,8 +10,8 @@ type MockURLService struct {
 	mock.Mock
 }
 
-func (m *MockURLService) Save(originalURL string) (string, error) {
-	args := m.Called(originalURL)
+func (m *MockURLService) Save(originalURL string, userID string) (string, error) {
+	args := m.Called(originalURL, userID)
 	return args.String(0), nil
 }
 
@@ -23,11 +23,17 @@ func (m *MockURLService) GetByID(id string) (string, error) {
 func (m *MockURLService) Ping() error {
 	return nil
 }
-func (m *MockURLService) ProcessBatch(batchRequests []entity.BatchRequest) ([]entity.BatchResponse, error) {
-	args := m.Called(batchRequests)
+
+func (m *MockURLService) ProcessBatch(batchRequests []entity.BatchRequest, userID string) ([]entity.BatchResponse, error) {
+	args := m.Called(batchRequests, userID)
 
 	if resp, ok := args.Get(0).([]entity.BatchResponse); ok {
 		return resp, args.Error(1)
 	}
 	return []entity.BatchResponse{}, args.Error(1)
+}
+
+func (m *MockURLService) BuildURL(uri string) string {
+	args := m.Called(uri)
+	return args.String(0)
 }

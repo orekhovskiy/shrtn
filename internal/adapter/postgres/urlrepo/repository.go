@@ -19,6 +19,9 @@ func NewRepository(config config.Config) (*PostgresURLRepository, error) {
 	if _, err := db.Exec(createTableIfNotExists); err != nil {
 		return nil, err
 	}
+	if _, err = db.Exec(createIndexIfNotExists); err != nil {
+		return nil, err
+	}
 
 	return &PostgresURLRepository{db: db}, nil
 }

@@ -6,10 +6,11 @@ import (
 )
 
 type Repository interface {
-	Save(id string, url string) error
+	Save(id string, url string, userID string) error
 	GetByID(id string) (string, error)
 	Ping() error
-	SaveMany([]entity.URLRecord) ([]entity.URLRecord, error)
+	SaveMany(recordsToSave []entity.URLRecord, userID string) ([]entity.URLRecord, error)
+	GetUserURLs(userID string) ([]entity.URLRecord, error)
 }
 
 type URLShortenerService struct {
