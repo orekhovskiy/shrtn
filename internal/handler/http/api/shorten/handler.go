@@ -8,7 +8,6 @@ import (
 )
 
 type URLShortenerService interface {
-	GetByID(id string) (url string, err error)
 	Save(url string, userID string) (id string, err error)
 	ProcessBatch(batchRequests []entity.BatchRequest, userID string) (batchResponses []entity.BatchResponse, err error)
 	BuildURL(uri string) string

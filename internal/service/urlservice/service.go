@@ -7,10 +7,11 @@ import (
 
 type Repository interface {
 	Save(id string, url string, userID string) error
-	GetByID(id string) (string, error)
+	GetByID(id string) (*entity.URLRecord, error)
 	Ping() error
 	SaveMany(recordsToSave []entity.URLRecord, userID string) ([]entity.URLRecord, error)
 	GetUserURLs(userID string) ([]entity.URLRecord, error)
+	MarkURLsAsDeleted(batch []string, userID string) error
 }
 
 type URLShortenerService struct {

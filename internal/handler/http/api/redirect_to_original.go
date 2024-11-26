@@ -9,7 +9,7 @@ import (
 
 func (h Handler) RedirectToOriginal(w http.ResponseWriter, r *http.Request) {
 	id := strings.TrimPrefix(r.URL.Path, "/")
-	originalURL, err := h.urlService.GetByID(id)
+	result, err := h.urlService.GetByID(id)
 
 	if err != nil {
 		h.logger.Error("error getting original url by id",
@@ -20,8 +20,16 @@ func (h Handler) RedirectToOriginal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !result.Success {
+		h.logger.Info("requesting deleted url",
+			zap.String("url", result.OriginalURL),
+		)
+		http.Error(w, "Gone", http.StatusGone)
+		return
+	}
+
 	h.logger.Info("redirecting",
-		zap.String("url", originalURL),
+		zap.String("url", result.OriginalURL),
 	)
-	http.Redirect(w, r, originalURL, http.StatusTemporaryRedirect)
+	http.Redirect(w, r, result.OriginalURL, http.StatusTemporaryRedirect)
 }

@@ -14,4 +14,8 @@ func (h *Handler) AddRoutes(r *chi.Mux) {
 	r.
 		With(middleware.AuthMiddleware(h.opts, h.logger, true)).
 		Get("/api/user/urls", h.getUserURLs)
+
+	r.
+		With(middleware.AuthMiddleware(h.opts, h.logger, true)).
+		Delete("/api/user/urls", h.deleteUrls)
 }

@@ -15,9 +15,12 @@ func (m *MockURLService) Save(originalURL string, userID string) (string, error)
 	return args.String(0), nil
 }
 
-func (m *MockURLService) GetByID(id string) (string, error) {
+func (m *MockURLService) GetByID(id string) (*entity.Result, error) {
 	args := m.Called(id)
-	return args.String(0), args.Error(1)
+	if result, ok := args.Get(0).(*entity.Result); ok {
+		return result, args.Error(1)
+	}
+	return nil, args.Error(1)
 }
 
 func (m *MockURLService) Ping() error {
@@ -44,4 +47,9 @@ func (m *MockURLService) GetUserURLs(userID string) ([]entity.URLRecord, error) 
 		return urls, args.Error(1)
 	}
 	return nil, args.Error(1)
+}
+
+func (m *MockURLService) MarkURLsAsDeleted(shortURLs []string, userID string) error {
+	args := m.Called(shortURLs, userID)
+	return args.Error(0)
 }

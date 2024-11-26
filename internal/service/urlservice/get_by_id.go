@@ -1,11 +1,25 @@
 package urlservice
 
-func (s URLShortenerService) GetByID(id string) (string, error) {
-	url, err := s.urlRepository.GetByID(id)
+import (
+	"github.com/orekhovskiy/shrtn/internal/entity"
+)
+
+func (s URLShortenerService) GetByID(id string) (*entity.Result, error) {
+	record, err := s.urlRepository.GetByID(id)
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return url, nil
+	if record.IsDeleted {
+		return &entity.Result{
+			Success:     false,
+			OriginalURL: "",
+		}, nil
+	}
+
+	return &entity.Result{
+		Success:     true,
+		OriginalURL: record.OriginalURL,
+	}, nil
 }
