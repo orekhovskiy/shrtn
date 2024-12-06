@@ -10,7 +10,7 @@ import (
 type URLShortenerService interface {
 	Save(url string, userID string) (id string, err error)
 	ProcessBatch(batchRequests []entity.BatchRequest, userID string) (batchResponses []entity.BatchResponse, err error)
-	BuildURL(uri string) string
+	BuildURL(uri string) (string, error)
 }
 
 type AuthService interface {

@@ -20,36 +20,18 @@ func AuthMiddleware(options config.Config, logger logger.Logger, toRequireAuth b
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cookie, err := r.Cookie(CookieName)
-			// Handle missing or empty cookie
-			if cookie == nil || cookie.Value == "" || err != nil {
-				if toRequireAuth {
-					logger.Info("no auth cookie provided on protected route", zap.String("uri", r.RequestURI))
-					http.Error(w, "Unauthorized", http.StatusUnauthorized)
-					return
-				}
-				// Cookie is empty or not existing, generate a new one
-				userID := issueNewToken(w, options.JWTSecretKey)
-				ctx := context.WithValue(r.Context(), authservice.UserIDKey, userID)
-				next.ServeHTTP(w, r.WithContext(ctx))
+			if isInvalidToken(cookie, err) {
+				handleInvalidToken(w, r, next, options, logger, toRequireAuth)
 				return
 			}
 
-			// Parse JWT from cookie
 			claims := jwt.MapClaims{}
 			token, err := jwt.ParseWithClaims(cookie.Value, claims, func(token *jwt.Token) (interface{}, error) {
 				return []byte(options.JWTSecretKey), nil
 			})
 
 			if err != nil || !token.Valid {
-				if toRequireAuth {
-					logger.Info("invalid auth cookie provided on protected route", zap.String("uri", r.RequestURI))
-					http.Error(w, "Unauthorized", http.StatusUnauthorized)
-					return
-				}
-				// Cookie is not valid, generate a new one
-				userID := issueNewToken(w, options.JWTSecretKey)
-				ctx := context.WithValue(r.Context(), authservice.UserIDKey, userID)
-				next.ServeHTTP(w, r.WithContext(ctx))
+				handleInvalidToken(w, r, next, options, logger, toRequireAuth)
 				return
 			}
 
@@ -66,11 +48,31 @@ func AuthMiddleware(options config.Config, logger logger.Logger, toRequireAuth b
 	}
 }
 
-func issueNewToken(w http.ResponseWriter, secretKey string) string {
-	// Generate new userID
+func isInvalidToken(cookie *http.Cookie, err error) bool {
+	return cookie == nil || cookie.Value == "" || err != nil
+}
+
+func handleInvalidToken(w http.ResponseWriter, r *http.Request, next http.Handler, options config.Config, logger logger.Logger, toRequireAuth bool) {
+	if toRequireAuth {
+		logger.Info("invalid or missing auth cookie", zap.String("uri", r.RequestURI))
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	userID, err := issueNewToken(w, options.JWTSecretKey)
+	if err != nil {
+		logger.Error("failed to issue new token", zap.Error(err))
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	ctx := context.WithValue(r.Context(), authservice.UserIDKey, userID)
+	next.ServeHTTP(w, r.WithContext(ctx))
+}
+
+func issueNewToken(w http.ResponseWriter, secretKey string) (string, error) {
 	userID := uuid.New().String()
 
-	// generate JWT
 	claims := jwt.MapClaims{
 		"user_id": userID,
 		"exp":     time.Now().Add(24 * time.Hour).Unix(),
@@ -78,11 +80,9 @@ func issueNewToken(w http.ResponseWriter, secretKey string) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {
-		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
-		return ""
+		return "", err
 	}
 
-	// Set JWT inside a Cookie
 	http.SetCookie(w, &http.Cookie{
 		Name:     CookieName,
 		Value:    tokenString,
@@ -91,5 +91,5 @@ func issueNewToken(w http.ResponseWriter, secretKey string) string {
 		Path:     "/",
 	})
 
-	return userID
+	return userID, nil
 }

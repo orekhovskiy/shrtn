@@ -11,7 +11,7 @@ type URLShortenerService interface {
 	GetByID(id string) (*entity.Result, error)
 	Save(url string, userID string) (id string, err error)
 	Ping() error
-	BuildURL(uri string) string
+	BuildURL(uri string) (string, error)
 }
 
 type AuthService interface {

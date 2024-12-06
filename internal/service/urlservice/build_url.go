@@ -1,11 +1,15 @@
 package urlservice
 
-import "strings"
+import (
+	"fmt"
+	"net/url"
+)
 
-func (s *URLShortenerService) BuildURL(uri string) string {
-	var builder strings.Builder
-	builder.WriteString(s.options.BaseURL)
-	builder.WriteString("/")
-	builder.WriteString(uri)
-	return builder.String()
+func (s *URLShortenerService) BuildURL(uri string) (string, error) {
+	fullURL := s.options.BaseURL + "/" + uri
+	_, err := url.Parse(fullURL)
+	if err != nil {
+		return "", fmt.Errorf("invalid URL: %w", err)
+	}
+	return fullURL, nil
 }

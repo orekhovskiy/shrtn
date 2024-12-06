@@ -2,25 +2,31 @@ package userurls
 
 import (
 	"encoding/json"
-	"go.uber.org/zap"
 	"net/http"
+
+	"go.uber.org/zap"
 )
+
+type URLResponse struct {
+	ShortURL    string `json:"short_url"`
+	OriginalURL string `json:"original_url"`
+}
 
 func (h *Handler) getUserURLs(w http.ResponseWriter, r *http.Request) {
 	userID, ok := h.authService.GetUserIDFromContext(r.Context())
 	if !ok {
 		h.logger.Info("no user ID provided, rejecting")
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		h.respondWithError(w, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
 
 	urls, err := h.urlService.GetUserURLs(userID)
 	if err != nil {
-		h.logger.Error("Unable to fetch URLs for user",
+		h.logger.Error("unable to fetch URLs for user",
 			zap.String("user_id", userID),
 			zap.Error(err),
 		)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		h.respondWithError(w, http.StatusInternalServerError, "Internal Server Error")
 		return
 	}
 
@@ -29,18 +35,28 @@ func (h *Handler) getUserURLs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := make([]map[string]string, len(urls))
+	response := make([]URLResponse, len(urls))
 	for i, url := range urls {
-		response[i] = map[string]string{
-			"short_url":    url.ShortURL,
-			"original_url": url.OriginalURL,
+		response[i] = URLResponse{
+			ShortURL:    url.ShortURL,
+			OriginalURL: url.OriginalURL,
 		}
 	}
 
+	h.respondWithJSON(w, http.StatusOK, response)
+}
+
+func (h *Handler) respondWithError(w http.ResponseWriter, statusCode int, message string) {
+	http.Error(w, message, statusCode)
+}
+
+func (h *Handler) respondWithJSON(w http.ResponseWriter, statusCode int, payload interface{}) {
 	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(response)
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
+	w.WriteHeader(statusCode)
+	if err := json.NewEncoder(w).Encode(payload); err != nil {
+		h.logger.Error("failed to write JSON response",
+			zap.Error(err),
+		)
+		h.respondWithError(w, http.StatusInternalServerError, "Internal Server Error")
 	}
 }

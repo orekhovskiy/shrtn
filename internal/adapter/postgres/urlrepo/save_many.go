@@ -1,7 +1,7 @@
 package urlrepo
 
 import (
-	"strconv"
+	"fmt"
 	"strings"
 
 	"github.com/google/uuid"
@@ -28,9 +28,10 @@ func (r *PostgresURLRepository) SaveMany(records []entity.URLRecord, userID stri
 			record.UUID = uuid.New().String()
 		}
 		record.UserID = userID
-
-		values = append(values,
-			"($"+strconv.Itoa(i*4+1)+", $"+strconv.Itoa(i*4+2)+", $"+strconv.Itoa(i*4+3)+", $"+strconv.Itoa(i*4+4)+")")
+		values = append(values, fmt.Sprintf(
+			"($%d, $%d, $%d, $%d)",
+			i*4+1, i*4+2, i*4+3, i*4+4,
+		))
 		args = append(args, record.UUID, record.ShortURL, record.OriginalURL, record.UserID)
 	}
 

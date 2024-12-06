@@ -9,7 +9,10 @@ func (s *URLShortenerService) GetUserURLs(userID string) ([]entity.URLRecord, er
 	}
 
 	for i := range userURLs {
-		userURLs[i].ShortURL = s.BuildURL(userURLs[i].ShortURL)
+		userURLs[i].ShortURL, err = s.BuildURL(userURLs[i].ShortURL)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return userURLs, nil

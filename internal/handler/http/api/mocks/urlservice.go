@@ -36,7 +36,7 @@ func (m *MockURLService) ProcessBatch(batchRequests []entity.BatchRequest, userI
 	return []entity.BatchResponse{}, args.Error(1)
 }
 
-func (m *MockURLService) BuildURL(uri string) string {
+func (m *MockURLService) BuildURL(uri string) (string, error) {
 	args := m.Called(uri)
 	return args.String(0)
 }
@@ -49,7 +49,7 @@ func (m *MockURLService) GetUserURLs(userID string) ([]entity.URLRecord, error) 
 	return nil, args.Error(1)
 }
 
-func (m *MockURLService) MarkURLsAsDeleted(shortURLs []string, userID string) error {
+func (m *MockURLService) MarkURLsAsDeleted(shortURLs []string, userID string) []error {
 	args := m.Called(shortURLs, userID)
 	return args.Error(0)
 }

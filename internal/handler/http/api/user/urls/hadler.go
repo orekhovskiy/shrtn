@@ -10,7 +10,7 @@ import (
 
 type URLShortenerService interface {
 	GetUserURLs(userID string) ([]entity.URLRecord, error)
-	MarkURLsAsDeleted(urls []string, userID string) error
+	MarkURLsAsDeleted(urls []string, userID string) []error
 }
 
 type AuthService interface {

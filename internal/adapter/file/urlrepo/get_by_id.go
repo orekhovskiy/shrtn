@@ -1,8 +1,8 @@
 package urlrepo
 
 import (
-	"fmt"
 	"github.com/orekhovskiy/shrtn/internal/entity"
+	e "github.com/orekhovskiy/shrtn/internal/errors"
 )
 
 func (r *FileURLRepository) GetByID(id string) (*entity.URLRecord, error) {
@@ -12,7 +12,7 @@ func (r *FileURLRepository) GetByID(id string) (*entity.URLRecord, error) {
 	record, exists := r.records[id]
 
 	if !exists {
-		return nil, fmt.Errorf("id not found: %s", id)
+		return nil, &e.NotFoundError{ID: id}
 	}
 
 	return &record, nil

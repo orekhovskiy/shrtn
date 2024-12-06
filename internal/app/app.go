@@ -1,7 +1,9 @@
 package app
 
 import (
+	"database/sql"
 	"fmt"
+	"log"
 
 	"go.uber.org/zap"
 
@@ -30,9 +32,16 @@ func Run(opts *config.Config) {
 
 	opts.LogConfig(zapLogger)
 
+	// Open db connections
+	db, err := sql.Open("pgx", opts.DatabaseDSN)
+	if err != nil {
+		log.Fatalf("failed to connect to database: %v", err)
+	}
+	defer db.Close()
+
 	var repo urlservice.Repository
 	if opts.DatabaseDSN != "" {
-		repo, err = postgres.NewRepository(*opts)
+		repo, err = postgres.NewRepository(*opts, db)
 		if err != nil {
 			panic(fmt.Sprintf("unable to connect to database: %v", err))
 		}

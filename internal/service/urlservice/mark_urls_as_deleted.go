@@ -1,8 +1,13 @@
 package urlservice
 
-func (s *URLShortenerService) MarkURLsAsDeleted(shortURLs []string, userID string) error {
+import (
+	"sync"
+)
+
+func (s *URLShortenerService) MarkURLsAsDeleted(shortURLs []string, userID string) []error {
 	updateChan := make(chan []string)
-	errors := make(chan error)
+	errorChan := make(chan error)
+	var wg sync.WaitGroup
 
 	// Fan-In
 	go func() {
@@ -20,15 +25,28 @@ func (s *URLShortenerService) MarkURLsAsDeleted(shortURLs []string, userID strin
 	// Workers
 	const workerCount = 3
 	for i := 0; i < workerCount; i++ {
+		wg.Add(1)
 		go func() {
+			defer wg.Done()
 			for batch := range updateChan {
 				if err := s.urlRepository.MarkURLsAsDeleted(batch, userID); err != nil {
-					errors <- err
+					errorChan <- err
 				}
 			}
 		}()
 	}
 
-	close(errors)
-	return nil
+	// Close errorChan after all workers complete
+	go func() {
+		wg.Wait()
+		close(errorChan)
+	}()
+
+	// Collect errors
+	var errors []error
+	for err := range errorChan {
+		errors = append(errors, err)
+	}
+
+	return errors
 }

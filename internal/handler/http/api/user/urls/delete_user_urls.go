@@ -26,8 +26,8 @@ func (h *Handler) deleteUrls(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	// Mark URLs as deleted
-	if err := h.urlService.MarkURLsAsDeleted(shortURLs, userID); err != nil {
-		h.logger.Error("failed to mark URLs as deleted", zap.Error(err))
+	if errs := h.urlService.MarkURLsAsDeleted(shortURLs, userID); errs != nil {
+		h.logger.Error("failed to mark URLs as deleted", zap.Errors("errors", errs))
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}

@@ -2,6 +2,7 @@ package urlrepo
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -80,33 +81,52 @@ func (r *FileURLRepository) filterDeletedURLs(shortURLs []string, userID string)
 }
 
 func (r *FileURLRepository) saveUpdatedRecordsToFile(updatedRecords []entity.URLRecord) error {
-	// Open the file for writing
-	file, err := os.OpenFile(r.filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	// Create temporary file
+	tmpFilePath := r.filePath + ".tmp"
+	tmpFile, err := os.OpenFile(tmpFilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
-		return fmt.Errorf("unable to open file for writing: %w", err)
+		return fmt.Errorf("unable to create temporary file: %w", err)
 	}
-	defer file.Close()
+	defer tmpFile.Close()
 
-	writer := bufio.NewWriter(file)
-
-	// Write each updated record to the file
-	for _, record := range updatedRecords {
-		data, err := json.Marshal(record)
-		if err != nil {
-			return fmt.Errorf("error marshaling record: %w", err)
-		}
-
-		if _, err := writer.WriteString(string(data) + "\n"); err != nil {
-			return fmt.Errorf("error writing to file: %w", err)
-		}
+	buffer, err := serializeAndBufferURLRecords(updatedRecords)
+	if err != nil {
+		return err
 	}
 
-	// Ensure all data is written to the file
+	// Write data from buffer to file
+	writer := bufio.NewWriter(tmpFile)
+	if _, err := writer.Write(buffer.Bytes()); err != nil {
+		return fmt.Errorf("error writing to temporary file: %w", err)
+	}
+
+	// Ensure data is written to file
 	if err := writer.Flush(); err != nil {
-		return fmt.Errorf("error flushing writer: %w", err)
+		return fmt.Errorf("error flushing temporary file: %w", err)
+	}
+
+	// Replace original file with temporary
+	if err := os.Rename(tmpFilePath, r.filePath); err != nil {
+		return fmt.Errorf("error replacing original file: %w", err)
 	}
 
 	return nil
+}
+
+func serializeAndBufferURLRecords(records []entity.URLRecord) (*bytes.Buffer, error) {
+	var buffer bytes.Buffer
+	for _, record := range records {
+		data, err := json.Marshal(record)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling record: %w", err)
+		}
+
+		// Add serialized data to buffer
+		buffer.Write(data)
+		buffer.WriteByte('\n')
+	}
+
+	return &buffer, nil
 }
 
 func contains(shortURLs []string, shortURL string) bool {
