@@ -70,8 +70,10 @@ func TestCreateShortUrl(t *testing.T) {
 			if tt.expectedStatus == http.StatusCreated {
 				mockURLService.On("Save", "https://example.com", tt.userID).
 					Return(tt.mockServiceID, nil).Once()
+
+				// Ensure BuildURL returns the correct value with no error
 				mockURLService.On("BuildURL", tt.mockServiceID).
-					Return(opts.BaseURL + "/" + tt.mockServiceID).Once()
+					Return(opts.BaseURL+"/"+tt.mockServiceID, nil).Once() // Correct return value with no error
 			}
 
 			// Create request

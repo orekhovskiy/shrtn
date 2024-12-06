@@ -76,7 +76,7 @@ func TestDeleteUrls(t *testing.T) {
 		req = req.WithContext(ctx)
 		w := httptest.NewRecorder()
 
-		mockURLService.On("MarkURLsAsDeleted", shortURLs, "user-123").Return(errors.New("service error"))
+		mockURLService.On("MarkURLsAsDeleted", shortURLs, "user-123").Return([]error{errors.New("error 1"), errors.New("error 2")})
 
 		handler.deleteUrls(w, req)
 

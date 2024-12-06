@@ -38,7 +38,7 @@ func (m *MockURLService) ProcessBatch(batchRequests []entity.BatchRequest, userI
 
 func (m *MockURLService) BuildURL(uri string) (string, error) {
 	args := m.Called(uri)
-	return args.String(0)
+	return args.String(0), args.Error(1)
 }
 
 func (m *MockURLService) GetUserURLs(userID string) ([]entity.URLRecord, error) {
@@ -51,5 +51,8 @@ func (m *MockURLService) GetUserURLs(userID string) ([]entity.URLRecord, error) 
 
 func (m *MockURLService) MarkURLsAsDeleted(shortURLs []string, userID string) []error {
 	args := m.Called(shortURLs, userID)
-	return args.Error(0)
+	if errors, ok := args.Get(0).([]error); ok {
+		return errors
+	}
+	return nil
 }

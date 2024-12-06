@@ -34,6 +34,8 @@ func TestCreateShortUrl(t *testing.T) {
 		contentType    string
 		body           string
 		mockSaveReturn string
+		buildURLReturn string
+		buildURLError  error
 		expectedStatus int
 		expectedBody   string
 	}{
@@ -44,6 +46,8 @@ func TestCreateShortUrl(t *testing.T) {
 			body:           "http://example.com",
 			expectedStatus: http.StatusCreated,
 			mockSaveReturn: "12345",
+			buildURLReturn: "http://localhost:8080/12345",
+			buildURLError:  nil,
 			expectedBody:   "http://localhost:8080/12345",
 		},
 		{
@@ -52,8 +56,12 @@ func TestCreateShortUrl(t *testing.T) {
 			contentType:    "text/plain",
 			body:           "invalid-url",
 			expectedStatus: http.StatusBadRequest,
+			mockSaveReturn: "",
+			buildURLReturn: "",
+			buildURLError:  nil,
 			expectedBody:   "Bad Request\n",
 		},
+		// Add more test cases here if needed
 	}
 
 	for _, tt := range tests {
@@ -63,8 +71,10 @@ func TestCreateShortUrl(t *testing.T) {
 				mockURLService.On("Save", tt.body, mock.Anything).Return(tt.mockSaveReturn, nil)
 			}
 
+			// Mock the BuildURL return value
+			mockURLService.On("BuildURL", tt.mockSaveReturn).Return(tt.buildURLReturn, tt.buildURLError)
+
 			mockAuthService.On("GetUserIDFromContext", mock.Anything).Return("testuser", true)
-			mockURLService.On("BuildURL", "12345").Return("http://localhost:8080/12345")
 
 			req := httptest.NewRequest(tt.method, "/shorten", strings.NewReader(tt.body))
 			req.Header.Set("Content-Type", tt.contentType)
