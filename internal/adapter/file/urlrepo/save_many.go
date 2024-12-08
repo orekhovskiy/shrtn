@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func (r *Repository) SaveMany(records []entity.URLRecord) ([]entity.URLRecord, error) {
+func (r *FileURLRepository) SaveMany(records []entity.URLRecord, userID string) ([]entity.URLRecord, error) {
 	if len(records) == 0 {
 		return make([]entity.URLRecord, 0), nil
 	}
@@ -33,6 +33,8 @@ func (r *Repository) SaveMany(records []entity.URLRecord) ([]entity.URLRecord, e
 			record.UUID = uuid.New().String()
 		}
 
+		record.UserID = userID
+
 		data, err := json.Marshal(record)
 		if err != nil {
 			return nil, err
@@ -41,8 +43,13 @@ func (r *Repository) SaveMany(records []entity.URLRecord) ([]entity.URLRecord, e
 		if _, err := writer.WriteString(string(data) + "\n"); err != nil {
 			return nil, err
 		}
+		r.records[record.ShortURL] = record
 		responses = append(responses, record)
 	}
 
-	return responses, writer.Flush()
+	if err := writer.Flush(); err != nil {
+		return nil, err
+	}
+
+	return responses, nil
 }

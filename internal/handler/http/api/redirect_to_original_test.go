@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"github.com/orekhovskiy/shrtn/internal/entity"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -23,7 +24,7 @@ func TestRedirectToOriginal(t *testing.T) {
 	tests := []struct {
 		name             string
 		path             string
-		mockReturnURL    string
+		mockReturnResult *entity.Result
 		mockReturnError  error
 		expectedStatus   int
 		expectedLocation string
@@ -31,7 +32,7 @@ func TestRedirectToOriginal(t *testing.T) {
 		{
 			name:             "Successful Redirect",
 			path:             "/12345",
-			mockReturnURL:    "http://example.com",
+			mockReturnResult: &entity.Result{Success: true, OriginalURL: "http://example.com"},
 			mockReturnError:  nil,
 			expectedStatus:   http.StatusTemporaryRedirect,
 			expectedLocation: "http://example.com",
@@ -39,7 +40,7 @@ func TestRedirectToOriginal(t *testing.T) {
 		{
 			name:             "URL Not Found",
 			path:             "/invalid-id",
-			mockReturnURL:    "",
+			mockReturnResult: nil,
 			mockReturnError:  fmt.Errorf("URL not found"),
 			expectedStatus:   http.StatusBadRequest,
 			expectedLocation: "",
@@ -48,7 +49,9 @@ func TestRedirectToOriginal(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockService.On("GetByID", strings.TrimPrefix(tt.path, "/")).Return(tt.mockReturnURL, tt.mockReturnError)
+			mockService.
+				On("GetByID", strings.TrimPrefix(tt.path, "/")).
+				Return(tt.mockReturnResult, tt.mockReturnError)
 
 			req := httptest.NewRequest(http.MethodGet, tt.path, nil)
 			rec := httptest.NewRecorder()

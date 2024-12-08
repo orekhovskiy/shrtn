@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/orekhovskiy/shrtn/config"
 	"github.com/orekhovskiy/shrtn/internal/handler/http/api/mocks"
@@ -16,9 +17,16 @@ import (
 
 func TestCreateShortUrl(t *testing.T) {
 	mockLogger := &logger.NoopLogger{}
-	mockService := new(mocks.MockURLService)
+	mockURLService := new(mocks.MockURLService)
+	mockAuthService := new(mocks.MockAuthService)
+
 	opts := config.Config{BaseURL: "http://localhost:8080"}
-	handler := Handler{logger: mockLogger, opts: opts, urlService: mockService}
+	handler := Handler{
+		logger:      mockLogger,
+		opts:        opts,
+		urlService:  mockURLService,
+		authService: mockAuthService,
+	}
 
 	tests := []struct {
 		name           string
@@ -26,6 +34,7 @@ func TestCreateShortUrl(t *testing.T) {
 		expectedStatus int
 		mockServiceID  string
 		contentType    string
+		userID         string
 	}{
 		{
 			name:           "Valid JSON request",
@@ -33,25 +42,38 @@ func TestCreateShortUrl(t *testing.T) {
 			expectedStatus: http.StatusCreated,
 			mockServiceID:  "abc123",
 			contentType:    "application/json",
+			userID:         "test-user-id",
 		},
 		{
 			name:           "Invalid JSON request",
 			requestBody:    `{"invalid_json"`,
 			expectedStatus: http.StatusBadRequest,
 			contentType:    "application/json",
+			userID:         "test-user-id",
 		},
 		{
 			name:           "Invalid URL",
 			requestBody:    `{"url":"invalid_url"}`,
 			expectedStatus: http.StatusBadRequest,
 			contentType:    "application/json",
+			userID:         "test-user-id",
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Mock behavior for valid URL request
+			// Mock behavior for user ID extraction
+			mockAuthService.On("GetUserIDFromContext", mock.Anything).
+				Return(tt.userID, true).Once()
+
+			// Mock behavior for URL service
 			if tt.expectedStatus == http.StatusCreated {
-				mockService.On("Save", "https://example.com").Return(tt.mockServiceID)
+				mockURLService.On("Save", "https://example.com", tt.userID).
+					Return(tt.mockServiceID, nil).Once()
+
+				// Ensure BuildURL returns the correct value with no error
+				mockURLService.On("BuildURL", tt.mockServiceID).
+					Return(opts.BaseURL+"/"+tt.mockServiceID, nil).Once() // Correct return value with no error
 			}
 
 			// Create request
@@ -67,7 +89,7 @@ func TestCreateShortUrl(t *testing.T) {
 			// Check the status code
 			assert.Equal(t, tt.expectedStatus, rec.Code)
 
-			// Check the response for the valid case
+			// Validate the response for the valid case
 			if tt.expectedStatus == http.StatusCreated {
 				var response ShortenResponse
 				err := json.NewDecoder(rec.Body).Decode(&response)

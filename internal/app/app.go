@@ -1,7 +1,9 @@
 package app
 
 import (
+	"database/sql"
 	"fmt"
+	"log"
 
 	"go.uber.org/zap"
 
@@ -11,7 +13,9 @@ import (
 	"github.com/orekhovskiy/shrtn/internal/handler/http"
 	"github.com/orekhovskiy/shrtn/internal/handler/http/api"
 	"github.com/orekhovskiy/shrtn/internal/handler/http/api/shorten"
+	userurls "github.com/orekhovskiy/shrtn/internal/handler/http/api/user/urls"
 	"github.com/orekhovskiy/shrtn/internal/logger"
+	"github.com/orekhovskiy/shrtn/internal/service/authservice"
 	"github.com/orekhovskiy/shrtn/internal/service/urlservice"
 )
 
@@ -28,9 +32,16 @@ func Run(opts *config.Config) {
 
 	opts.LogConfig(zapLogger)
 
+	// Open db connections
+	db, err := sql.Open("pgx", opts.DatabaseDSN)
+	if err != nil {
+		log.Fatalf("failed to connect to database: %v", err)
+	}
+	defer db.Close()
+
 	var repo urlservice.Repository
 	if opts.DatabaseDSN != "" {
-		repo, err = postgres.NewRepository(*opts)
+		repo, err = postgres.NewRepository(*opts, db)
 		if err != nil {
 			panic(fmt.Sprintf("unable to connect to database: %v", err))
 		}
@@ -43,14 +54,17 @@ func Run(opts *config.Config) {
 		}
 	}
 
-	service := urlservice.NewService(*opts, repo)
-	apiHandler := api.NewHandler(zapLogger, opts, service)
-	shortenHandler := shorten.NewHandler(zapLogger, opts, service)
+	urlService := urlservice.NewService(*opts, repo)
+	authService := authservice.NewService(*opts)
+	apiHandler := api.NewHandler(zapLogger, opts, urlService, authService)
+	shortenHandler := shorten.NewHandler(zapLogger, opts, urlService, authService)
+	userURLsHandler := userurls.NewHandler(zapLogger, opts, urlService, authService)
 
 	router := http.NewRouter()
 	router.
 		WithHandler(apiHandler).
-		WithHandler(shortenHandler)
+		WithHandler(shortenHandler).
+		WithHandler(userURLsHandler)
 
 	server := http.NewServer(opts)
 	server.RegisterRoutes(router)

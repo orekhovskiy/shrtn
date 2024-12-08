@@ -1,14 +1,12 @@
 package urlservice
 
-import (
-	"crypto/sha256"
-	"encoding/hex"
-)
+func (s URLShortenerService) Save(url string, userID string) (string, error) {
+	id, err := s.createShortURL(url)
+	if err != nil {
+		return "", err
+	}
 
-func (s Service) Save(url string) (string, error) {
-	hash := sha256.Sum256([]byte(url))
-	id := hex.EncodeToString(hash[:])[:7]
-	err := s.urlRepository.Save(id, url)
+	err = s.urlRepository.Save(id, url, userID)
 	if err != nil {
 		return "", err
 	}

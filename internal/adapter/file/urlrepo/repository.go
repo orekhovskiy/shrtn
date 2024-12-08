@@ -7,14 +7,14 @@ import (
 	"github.com/orekhovskiy/shrtn/internal/entity"
 )
 
-type Repository struct {
+type FileURLRepository struct {
 	records  map[string]entity.URLRecord
 	filePath string
 	mu       sync.RWMutex
 }
 
-func NewRepository(opts config.Config) *Repository {
-	return &Repository{
+func NewRepository(opts config.Config) *FileURLRepository {
+	return &FileURLRepository{
 		records:  make(map[string]entity.URLRecord),
 		filePath: opts.FilePath,
 	}

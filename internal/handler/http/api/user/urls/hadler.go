@@ -1,17 +1,16 @@
-package api
+package userurls
 
 import (
 	"context"
+
 	"github.com/orekhovskiy/shrtn/config"
 	"github.com/orekhovskiy/shrtn/internal/entity"
 	"github.com/orekhovskiy/shrtn/internal/logger"
 )
 
 type URLShortenerService interface {
-	GetByID(id string) (*entity.Result, error)
-	Save(url string, userID string) (id string, err error)
-	Ping() error
-	BuildURL(uri string) (string, error)
+	GetUserURLs(userID string) ([]entity.URLRecord, error)
+	MarkURLsAsDeleted(urls []string, userID string) []error
 }
 
 type AuthService interface {

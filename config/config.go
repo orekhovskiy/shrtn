@@ -12,6 +12,7 @@ type Config struct {
 	BaseURL       string
 	FilePath      string
 	DatabaseDSN   string
+	JWTSecretKey  string
 }
 
 func (c *Config) LogConfig(logger logger.Logger) {
@@ -19,7 +20,8 @@ func (c *Config) LogConfig(logger logger.Logger) {
 		zap.String("server_address", c.ServerAddress),
 		zap.String("base_url", c.BaseURL),
 		zap.String("file_path", c.FilePath),
-		zap.String("database_dsn", c.DatabaseDSN), // sensitive data - log carefully
+		zap.String("database_dsn", c.DatabaseDSN),
+		zap.String("jwt_secret_key", c.JWTSecretKey),
 	)
 }
 
@@ -43,6 +45,10 @@ func InitializeConfig() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+	err = viper.BindEnv("JWT_SECRET_KEY", "JWT_SECRET_KEY")
+	if err != nil {
+		return nil, err
+	}
 	var rootCmd = &cobra.Command{
 		Use:   "shrtn",
 		Short: "URL Shortener Service",
@@ -60,6 +66,9 @@ func InitializeConfig() (*Config, error) {
 			if viper.GetString("DATABASE_DSN") != "" {
 				config.DatabaseDSN = viper.GetString("DATABASE_DSN")
 			}
+			if viper.GetString("JWT_SECRET_KEY") != "" {
+				config.DatabaseDSN = viper.GetString("JWT_SECRET_KEY")
+			}
 		},
 	}
 
@@ -67,6 +76,7 @@ func InitializeConfig() (*Config, error) {
 	rootCmd.Flags().StringVarP(&config.BaseURL, "base-url", "b", "http://localhost:8080", "Base URL for shortened URLs (e.g. http://localhost:8080/)")
 	rootCmd.Flags().StringVarP(&config.FilePath, "file", "f", "storage.json", "Path to the file for storing URLs (e.g. storage.json)")
 	rootCmd.Flags().StringVarP(&config.DatabaseDSN, "database-dsn", "d", "", "Database connection string (e.g. postgres://postgres:password@localhost:5432/shrtn)")
+	rootCmd.Flags().StringVarP(&config.JWTSecretKey, "jwt-secret-key", "k", "cute kitty cat", "JWT symmetrical encryption key (e.g. cute kitty cat)")
 	err = rootCmd.Execute()
 	if err != nil {
 		return nil, err
