@@ -14,11 +14,6 @@ func (r *PostgresURLRepository) SaveMany(records []entity.URLRecord, userID stri
 		return nil, nil
 	}
 
-	tx, err := r.db.Begin()
-	if err != nil {
-		return nil, err
-	}
-
 	insertedRecords := make([]entity.URLRecord, 0, len(records))
 
 	var values []string
@@ -42,14 +37,11 @@ func (r *PostgresURLRepository) SaveMany(records []entity.URLRecord, userID stri
         RETURNING uuid, short_url, original_url
     `
 
-	rows, err := tx.Query(sqlQuery, args...)
+	rows, err := r.db.Query(sqlQuery, args...)
 	if err != nil {
-		err := tx.Rollback()
-		if err != nil {
-			return nil, err
-		}
 		return nil, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var insertedRecord entity.URLRecord
@@ -58,20 +50,12 @@ func (r *PostgresURLRepository) SaveMany(records []entity.URLRecord, userID stri
 			&insertedRecord.ShortURL,
 			&insertedRecord.OriginalURL,
 		); err != nil {
-			err := tx.Rollback()
-			if err != nil {
-				return nil, err
-			}
 			return nil, err
 		}
 		insertedRecords = append(insertedRecords, insertedRecord)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
 

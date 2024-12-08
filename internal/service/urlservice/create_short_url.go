@@ -5,36 +5,43 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"math/rand"
+	"time"
 
 	e "github.com/orekhovskiy/shrtn/internal/errors"
 )
 
 func (s *URLShortenerService) createShortURL(originalURL string) (string, error) {
-	// Generate the hash for the original URL and shorten it to 7 characters
-	hash := sha256.Sum256([]byte(originalURL))
-	shortURL := hex.EncodeToString(hash[:])[:7]
+	// Set initial random seed
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	// Check if the short URL already exists
-	existingURL, err := s.GetByID(shortURL)
-	if err != nil {
-		if errors.Is(err, &e.NotFoundError{}) {
-			// No collision, it's a new URL
+	var shortURL string
+
+	for {
+		// Generate new salt
+		salt := fmt.Sprintf("%d", r.Intn(1000000))
+
+		// Make a hash with original url and generated salt
+		hash := sha256.Sum256([]byte(originalURL + salt))
+		shortURL = hex.EncodeToString(hash[:])[:7]
+
+		// Check if collision occurred
+		existingURL, err := s.GetByID(shortURL)
+		if err != nil {
+			if errors.Is(err, &e.NotFoundError{}) {
+				// No collision occurred
+				break
+			}
+			// Internal error
+			return "", err
+		}
+
+		// If hashes collided, check original url
+		if existingURL.OriginalURL == originalURL {
 			return shortURL, nil
 		}
-		// If the error is something else, return it
-		return "", err
 	}
 
-	// If we got here, it means the short URL already maps to an existing original URL
-	// Therefore, it's a collision
-	if existingURL.OriginalURL != originalURL {
-		return "", fmt.Errorf(
-			"collided URL: the short URL '%s' already maps to a different original URL '%s'",
-			shortURL,
-			existingURL.OriginalURL,
-		)
-	}
-
-	// If no collision, return the existing short URL
+	// If no collision occurred, return generated short URL
 	return shortURL, nil
 }

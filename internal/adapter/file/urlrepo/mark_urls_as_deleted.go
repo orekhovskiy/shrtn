@@ -81,13 +81,20 @@ func (r *FileURLRepository) filterDeletedURLs(shortURLs []string, userID string)
 }
 
 func (r *FileURLRepository) saveUpdatedRecordsToFile(updatedRecords []entity.URLRecord) error {
+	// Take a mutex, since many routines may call this func
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	// Create temporary file
 	tmpFilePath := r.filePath + ".tmp"
 	tmpFile, err := os.OpenFile(tmpFilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return fmt.Errorf("unable to create temporary file: %w", err)
 	}
-	defer tmpFile.Close()
+	defer func() {
+		tmpFile.Close()
+		os.Remove(tmpFile.Name())
+	}()
 
 	buffer, err := serializeAndBufferURLRecords(updatedRecords)
 	if err != nil {

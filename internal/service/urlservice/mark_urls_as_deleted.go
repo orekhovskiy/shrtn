@@ -5,7 +5,8 @@ import (
 )
 
 func (s *URLShortenerService) MarkURLsAsDeleted(shortURLs []string, userID string) []error {
-	updateChan := make(chan []string)
+	const workerCount = 3
+	updateChan := make(chan []string, workerCount)
 	errorChan := make(chan error)
 	var wg sync.WaitGroup
 
@@ -23,7 +24,6 @@ func (s *URLShortenerService) MarkURLsAsDeleted(shortURLs []string, userID strin
 	}()
 
 	// Workers
-	const workerCount = 3
 	for i := 0; i < workerCount; i++ {
 		wg.Add(1)
 		go func() {
